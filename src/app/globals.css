@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-be-vietnam), "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  /* Màu chủ đạo: xanh ngọc dịu, tạo cảm giác tin cậy */
+  --color-brand-50: #effaf6;
+  --color-brand-100: #d7f3e7;
+  --color-brand-200: #b2e6d1;
+  --color-brand-300: #7fd2b4;
+  --color-brand-400: #4bb893;
+  --color-brand-500: #279c79;
+  --color-brand-600: #1a7f62;
+  --color-brand-700: #166650;
+  --color-brand-800: #145141;
+  --color-brand-900: #114337;
+
+  /* Màu nhấn ấm cho giá tiền và nút liên hệ */
+  --color-accent-50: #fff7ed;
+  --color-accent-100: #ffedd5;
+  --color-accent-500: #f0771a;
+  --color-accent-600: #d95f0e;
+  --color-accent-700: #b4480c;
+
+  /* Nền và chữ */
+  --color-surface: #fbfaf7;
+  --color-ink: #1c2321;
+  --color-muted: #5f6b67;
+
+  --shadow-card: 0 1px 2px rgb(28 35 33 / 0.05), 0 4px 16px -6px rgb(28 35 33 / 0.12);
+  --shadow-card-hover: 0 2px 4px rgb(28 35 33 / 0.06), 0 12px 28px -10px rgb(28 35 33 / 0.2);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01";
+}
+
+/* Vùng focus rõ ràng cho bàn phím */
+:focus-visible {
+  outline: 3px solid var(--color-brand-400);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Ẩn nút tăng giảm của input số */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Skeleton */
+@keyframes shimmer {
+  0% {
+    background-position: -600px 0;
+  }
+  100% {
+    background-position: 600px 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, #ecebe6 25%, #f5f4f0 37%, #ecebe6 63%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* Cuộn ngang thư viện ảnh */
+.snap-x-gallery {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.snap-x-gallery::-webkit-scrollbar {
+  display: none;
+}
+.snap-x-gallery > * {
+  scroll-snap-align: start;
+}

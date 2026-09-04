@@ -36,9 +36,9 @@ export const siteConfig = {
   contact: {
     name: "Anh Hưng (chủ nhà)",
     /** Số điện thoại dạng hiển thị */
-    phone: "0923 422 240",
+    phone: "0372 464 016",
     /** Số dùng cho liên kết gọi điện và Zalo (chỉ chữ số) */
-    phoneRaw: "0923422240",
+    phoneRaw: "0372464016",
     /** Địa chỉ văn phòng / khu vực hoạt động */
     address: "Quận 7, Thành phố Hồ Chí Minh",
     /** Khung giờ nhận cuộc gọi */

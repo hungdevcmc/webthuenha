@@ -1,6 +1,6 @@
-# Nhà Trọ An Tâm – Website đăng tin cho thuê nhà/phòng
+# Nhà trọ VinUni AI Thực Chiến – Website đăng tin cho thuê nhà/phòng
 
-**Đang chạy tại:** https://nha-tro-an-tam.vercel.app · **Quản trị:** https://nha-tro-an-tam.vercel.app/admin
+**Đang chạy tại:** https://aithucchiennhatro.vercel.app · **Quản trị:** https://aithucchiennhatro.vercel.app/admin
 
 Website gồm hai khu vực tách biệt:
 

@@ -4,9 +4,26 @@
  * Đây là nơi duy nhất chứa tên thương hiệu, số điện thoại, Zalo, địa chỉ...
  * Đổi thông tin tại đây là toàn bộ website thay đổi theo.
  */
+/** Địa chỉ mặc định của website khi không có biến môi trường hợp lệ */
+const FALLBACK_SITE_URL = "https://aithucchiennhatro.vercel.app";
+
+/**
+ * Lấy địa chỉ website. Nhận biến NEXT_PUBLIC_SITE_URL nếu là URL hợp lệ,
+ * ngược lại dùng giá trị mặc định. Tránh việc biến rỗng làm hỏng build.
+ */
+function resolveSiteUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!raw) return FALLBACK_SITE_URL;
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return FALLBACK_SITE_URL;
+  }
+}
+
 export const siteConfig = {
   /** Tên thương hiệu hiển thị trên toàn website */
-  name: "Nhà Trọ An Tâm",
+  name: "Nhà trọ VinUni AI Thực Chiến",
   /** Khẩu hiệu ngắn, hiển thị ở đầu trang chủ */
   tagline: "Phòng sạch, giá rõ ràng, chủ nhà uy tín",
   /** Lời giới thiệu ngắn ở đầu trang chủ */
@@ -19,9 +36,9 @@ export const siteConfig = {
   contact: {
     name: "Anh Hưng (chủ nhà)",
     /** Số điện thoại dạng hiển thị */
-    phone: "0901 234 567",
+    phone: "0923 422 240",
     /** Số dùng cho liên kết gọi điện và Zalo (chỉ chữ số) */
-    phoneRaw: "0901234567",
+    phoneRaw: "0923422240",
     /** Địa chỉ văn phòng / khu vực hoạt động */
     address: "Quận 7, Thành phố Hồ Chí Minh",
     /** Khung giờ nhận cuộc gọi */
@@ -30,7 +47,7 @@ export const siteConfig = {
   /** Thành phố mặc định khi tạo tin mới trong trang quản trị */
   defaultCity: "Thành phố Hồ Chí Minh",
   /** Địa chỉ website production (dùng cho SEO). Có thể ghi đè bằng biến NEXT_PUBLIC_SITE_URL */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: resolveSiteUrl(),
   /** Các tiện nghi gợi ý trong form quản trị */
   amenitySuggestions: [
     "Máy lạnh",

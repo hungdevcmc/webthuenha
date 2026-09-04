@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeImage } from "@/components/listings/safe-image";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -138,7 +138,7 @@ export function AdminListingTable({ listings }: { listings: ListingWithImages[] 
               >
                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-stone-100 sm:aspect-square">
                   {cover ? (
-                    <Image src={cover.url} alt="" fill sizes="96px" className="object-cover" />
+                    <SafeImage src={cover.url} alt="" fill sizes="96px" className="object-cover" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-stone-400">
                       <ImageOff className="size-6" aria-hidden="true" />

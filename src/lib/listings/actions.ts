@@ -48,6 +48,36 @@ function parseInput(input: unknown): ListingFormValues {
   return parsed.data;
 }
 
+/**
+ * Xóa file trong Storage nhưng CHỈ khi không còn dòng property_images nào trỏ tới.
+ * Tránh trường hợp một tin khác (hoặc chính tin này) vẫn đang dùng file đó
+ * mà file lại bị xóa mất, để lại ảnh hỏng trên giao diện.
+ */
+async function removeUnreferencedObjects(
+  supabase: Awaited<ReturnType<typeof requireAdmin>>,
+  paths: string[],
+) {
+  const unique = [...new Set(paths.filter((p) => typeof p === "string" && p.length > 0 && !p.includes("..")))];
+  if (unique.length === 0) return;
+
+  const { data: stillUsed, error } = await supabase
+    .from("property_images")
+    .select("storage_path")
+    .in("storage_path", unique);
+  if (error) {
+    // Không chắc chắn thì giữ file lại. Thà thừa file còn hơn mất ảnh.
+    console.error("Không kiểm tra được ảnh còn được dùng hay không:", error.message);
+    return;
+  }
+
+  const referenced = new Set((stillUsed ?? []).map((r) => r.storage_path));
+  const safeToDelete = unique.filter((p) => !referenced.has(p));
+  if (safeToDelete.length === 0) return;
+
+  const { error: removeError } = await supabase.storage.from(IMAGE_BUCKET).remove(safeToDelete);
+  if (removeError) console.error("Không xóa được file trong Storage:", removeError.message);
+}
+
 /** Chuẩn hoá danh sách ảnh: đúng một ảnh đại diện, sort_order liên tục */
 function normalizeImages(images: ListingFormValues["images"]) {
   const ordered = [...images].sort((a, b) => a.sort_order - b.sort_order);
@@ -104,7 +134,7 @@ async function saveImages(
         removed.map((r) => r.id),
       );
     if (delError) throw new ActionError(delError.message);
-    await supabase.storage.from(IMAGE_BUCKET).remove(removed.map((r) => r.storage_path));
+    await removeUnreferencedObjects(supabase, removed.map((r) => r.storage_path));
   }
 
   if (normalized.length === 0) return;
@@ -180,7 +210,7 @@ export async function deleteListing(id: string): Promise<ActionResult> {
     if (error) throw new ActionError(error.message);
     if (!data) throw new ActionError("Tin không tồn tại hoặc đã bị xóa.");
     if (images && images.length > 0) {
-      await supabase.storage.from(IMAGE_BUCKET).remove(images.map((i) => i.storage_path));
+      await removeUnreferencedObjects(supabase, images.map((i) => i.storage_path));
     }
     revalidateListingPaths(data.slug);
     return { ok: true, data: undefined };
@@ -215,14 +245,15 @@ export async function setListingPublished(id: string, isPublished: boolean): Pro
   }
 }
 
-/** Xóa file trong Storage (dùng khi admin bỏ ảnh vừa upload nhưng chưa lưu tin) */
+/**
+ * Xóa file trong Storage khi admin bỏ ảnh vừa upload nhưng chưa lưu tin.
+ * Chỉ xóa file không còn tin nào tham chiếu, nên dù form giữ trạng thái cũ
+ * (ví dụ người dùng bấm Quay lại trình duyệt) thì ảnh của tin đã lưu vẫn an toàn.
+ */
 export async function deleteStorageObjects(paths: string[]): Promise<ActionResult> {
   try {
     const supabase = await requireAdmin();
-    const clean = paths.filter((p) => typeof p === "string" && p.length > 0 && !p.includes(".."));
-    if (clean.length === 0) return { ok: true, data: undefined };
-    const { error } = await supabase.storage.from(IMAGE_BUCKET).remove(clean);
-    if (error) throw new ActionError(error.message);
+    await removeUnreferencedObjects(supabase, paths);
     return { ok: true, data: undefined };
   } catch (err) {
     return toResult(err);

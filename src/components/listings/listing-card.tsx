@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SafeImage } from "./safe-image";
 import Link from "next/link";
 import { BedDouble, Bath, ImageOff, MapPin, Ruler } from "lucide-react";
 import { formatArea, formatRelative, formatVND } from "@/lib/format";
@@ -25,7 +25,7 @@ export function ListingCard({ listing, now, priority }: Props) {
         aria-label={`Xem chi tiết: ${listing.title}`}
       >
         {cover ? (
-          <Image
+          <SafeImage
             src={cover.url}
             alt={`Ảnh ${listing.title}`}
             fill

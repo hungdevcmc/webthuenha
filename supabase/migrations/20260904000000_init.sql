@@ -1,5 +1,5 @@
 -- =====================================================================
--- Nhà Trọ An Tâm – schema, RLS, Storage và Realtime
+-- Nhà trọ VinUni AI Thực Chiến – schema, RLS, Storage và Realtime
 -- Chạy bằng: npx supabase db push   (hoặc dán vào SQL Editor của Supabase)
 -- =====================================================================
 

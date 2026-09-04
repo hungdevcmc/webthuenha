@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeImage } from "@/components/listings/safe-image";
 import { useRef, useState } from "react";
 import { ArrowDown, ArrowUp, ImagePlus, Loader2, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -131,7 +131,7 @@ export function ImageUploader({ value, onChange, disabled }: Props) {
           {value.map((img, index) => (
             <li key={img.storage_path} className={cn("overflow-hidden rounded-xl border bg-white", img.is_cover ? "border-brand-500 ring-2 ring-brand-200" : "border-stone-200")}>
               <div className="relative aspect-[4/3] bg-stone-100">
-                <Image src={img.url} alt={`Ảnh ${index + 1}`} fill sizes="(min-width: 768px) 25vw, 50vw" className="object-cover" />
+                <SafeImage src={img.url} alt={`Ảnh ${index + 1}`} fill sizes="(min-width: 768px) 25vw, 50vw" className="object-cover" />
                 {img.is_cover ? (
                   <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-brand-600 px-2 py-0.5 text-xs font-semibold text-white">
                     <Star className="size-3" aria-hidden="true" />

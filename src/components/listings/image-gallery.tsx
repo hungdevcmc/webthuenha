@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeImage } from "./safe-image";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ImageOff, X } from "lucide-react";
 import type { ListingImage } from "@/lib/listings/types";
@@ -77,7 +77,7 @@ export function ImageGallery({ images, title }: Props) {
               className="relative h-full w-full shrink-0 cursor-zoom-in focus-visible:outline-none"
               aria-label={`Phóng to ảnh ${index + 1} / ${count}`}
             >
-              <Image
+              <SafeImage
                 src={img.url}
                 alt={`${title} – ảnh ${index + 1}`}
                 fill
@@ -127,7 +127,7 @@ export function ImageGallery({ images, title }: Props) {
                 aria-label={`Xem ảnh ${index + 1}`}
                 aria-current={index === active ? "true" : undefined}
               >
-                <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />
+                <SafeImage src={img.url} alt="" fill sizes="80px" className="object-cover" />
               </button>
             </li>
           ))}
@@ -157,7 +157,7 @@ export function ImageGallery({ images, title }: Props) {
             </button>
           </div>
           <div className="relative flex-1" onClick={(e) => e.stopPropagation()}>
-            <Image
+            <SafeImage
               src={images[active].url}
               alt={`${title} – ảnh ${active + 1}`}
               fill

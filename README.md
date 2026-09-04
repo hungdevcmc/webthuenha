@@ -1,5 +1,7 @@
 # Nhà Trọ An Tâm – Website đăng tin cho thuê nhà/phòng
 
+**Đang chạy tại:** https://nha-tro-an-tam.vercel.app · **Quản trị:** https://nha-tro-an-tam.vercel.app/admin
+
 Website gồm hai khu vực tách biệt:
 
 - **Trang công khai** cho khách thuê: xem danh sách phòng, lọc, xem chi tiết, gọi điện / nhắn Zalo. Không cần đăng ký hay đăng nhập.
@@ -89,6 +91,8 @@ insert into public.admin_users (user_id) values ('<user-uid>');
 ```
 
 Sau khi có admin, xóa `SUPABASE_SERVICE_ROLE_KEY` khỏi `.env.local` cho an toàn.
+
+> Lưu ý: lệnh `npx supabase projects api-keys` che bớt khóa `sb_secret_…`. Nếu gặp lỗi *Invalid API key*, hãy lấy khóa `service_role` đầy đủ trong **Project Settings → API Keys** trên dashboard.
 
 ## 5. Dữ liệu mẫu
 

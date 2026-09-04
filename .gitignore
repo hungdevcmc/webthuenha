@@ -45,3 +45,6 @@ supabase/.temp
 supabase/.branches
 # Cấu hình chạy app cục bộ của công cụ
 .claude/
+
+# File tạm chứa thông tin nhạy cảm (không commit)
+*.local

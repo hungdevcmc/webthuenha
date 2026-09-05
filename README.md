@@ -4,7 +4,7 @@
 
 Website gồm hai khu vực tách biệt:
 
-- **Trang công khai** cho khách thuê: xem danh sách phòng, lọc, xem chi tiết, gọi điện / nhắn Zalo. Không cần đăng ký hay đăng nhập.
+- **Trang công khai** cho khách thuê: hai tab – `/` xem toàn bộ phòng và `/o-ghep` xem những phòng đang tìm bạn ở ghép. Lọc, xem chi tiết, gọi điện / nhắn Zalo. Không cần đăng ký hay đăng nhập.
 - **Trang quản trị** tại `/admin`: bắt buộc đăng nhập, dùng để thêm, sửa, ẩn/hiện, xóa tin và quản lý ảnh.
 
 Công nghệ: Next.js 16 (App Router, TypeScript), Tailwind CSS 4, Supabase (PostgreSQL + Auth + Storage + Realtime), triển khai trên Vercel. Toàn bộ đều dùng gói miễn phí.
@@ -27,6 +27,7 @@ Mọi nội dung thương hiệu nằm trong **một file duy nhất**: [`src/co
 | Địa chỉ, giờ nhận cuộc gọi | `contact.address`, `contact.hours` |
 | Tỉnh/thành mặc định khi tạo tin | `defaultCity` |
 | Danh sách tiện nghi gợi ý trong form | `amenitySuggestions` |
+| Tiêu đề và lời giới thiệu tab Tìm bạn ở ghép | `roommate.title`, `roommate.intro` |
 
 Sửa xong thì lưu file, chạy lại (`npm run dev`) hoặc đẩy lên Git để Vercel tự triển khai.
 
@@ -134,6 +135,7 @@ Sau khi có tên miền `*.vercel.app`, cập nhật lại `NEXT_PUBLIC_SITE_URL
 src/
   app/
     page.tsx                              Trang chủ (danh sách phòng)
+    o-ghep/page.tsx                       Tab "Tìm bạn ở ghép"
     phong/[slug]/page.tsx                 Trang chi tiết một phòng
     admin/login/page.tsx                  Đăng nhập quản trị
     admin/(dashboard)/page.tsx            Danh sách tin (quản trị)
@@ -163,7 +165,7 @@ tests/          Kiểm thử đơn vị (Vitest)
 
 | Bảng | Nội dung |
 | --- | --- |
-| `properties` | Tin đăng: tiêu đề, địa chỉ, giá, cọc, điện, nước, phí dịch vụ, diện tích, số phòng, tầng, tiện nghi, mô tả, liên hệ, `is_available`, `is_published`, `slug` duy nhất, `created_at`, `updated_at` |
+| `properties` | Tin đăng: tiêu đề, địa chỉ, giá, cọc, điện, nước, phí dịch vụ, diện tích, số phòng, tầng, tiện nghi, mô tả, liên hệ, `is_available`, `is_published`, `slug` duy nhất, `created_at`, `updated_at`, và nhóm ở ghép `roommate_open`, `roommate_male_count`, `roommate_female_count`, `roommate_note` |
 | `property_images` | Ảnh của tin: `storage_path`, `url`, `sort_order`, `is_cover`. Xóa tin thì ảnh xóa theo |
 | `admin_users` | Danh sách user được quyền quản trị, liên kết `auth.users` |
 
@@ -198,3 +200,19 @@ Trigger trong database gọi `realtime.send()` trên kênh công khai `listings`
 - **Ảnh và thông tin từng phòng**: đăng nhập `/admin` → bấm **Sửa** ở tin cần đổi → kéo thả ảnh mới, bấm ngôi sao để chọn ảnh đại diện, mũi tên để sắp xếp, thùng rác để xóa → **Lưu thay đổi**.
 - **Ẩn tin tạm thời**: bấm **Ẩn tin** trong danh sách quản trị. Tin biến mất khỏi trang khách ngay lập tức.
 - **Đánh dấu đã cho thuê**: bấm **Đánh dấu đã cho thuê**. Tin vẫn hiển thị nhưng có nhãn rõ ràng và nút liên hệ bị vô hiệu hóa.
+
+## 11. Tab "Tìm bạn ở ghép"
+
+Tab này ở địa chỉ `/o-ghep`, chỉ hiện những tin được bật chế độ tìm bạn ở ghép.
+
+**Cách bật cho một phòng:** vào trang quản trị, mở tin cần sửa, kéo tới mục **Tìm bạn ở ghép**, tích ô "Phòng này đang tìm bạn ở ghép", nhập số bạn nam và số bạn nữ hiện sẵn sàng ở ghép, rồi lưu. Muốn gỡ khỏi tab thì bỏ tích ô đó.
+
+Ô ghi chú không bắt buộc, dùng để nêu yêu cầu thêm (giờ giấc, thói quen sinh hoạt...). Nội dung này hiện ở trang chi tiết phòng.
+
+Khách xem sẽ thấy:
+
+- Nhãn "Ở ghép: 2 nam · 1 nữ" trên card phòng, ở cả trang chủ lẫn tab ở ghép.
+- Bộ lọc thêm ô "Bạn ở ghép" để chọn phòng đang có bạn nam hoặc bạn nữ.
+- Trang chi tiết có riêng một khối ghi rõ tổng số người và số lượng theo giới tính.
+
+Số người phải từ 1 trở lên khi đã bật chế độ ở ghép; hệ thống sẽ báo lỗi nếu để cả hai ô bằng 0.

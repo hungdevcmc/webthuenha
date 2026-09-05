@@ -2,15 +2,17 @@ import { SafeImage } from "./safe-image";
 import Link from "next/link";
 import { BedDouble, Bath, ImageOff, MapPin, Ruler } from "lucide-react";
 import { formatArea, formatRelative, formatVND } from "@/lib/format";
-import { coverImage, type ListingWithImages } from "@/lib/listings/types";
+import { coverImage, roommateInfo, type ListingWithImages } from "@/lib/listings/types";
 import { cn } from "@/lib/cn";
 import { StatusBadge } from "./status-badge";
+import { RoommateBadge } from "./roommate-badge";
 
 type Props = { listing: ListingWithImages; now: number; priority?: boolean };
 
 export function ListingCard({ listing, now, priority }: Props) {
   const cover = coverImage(listing);
   const rented = !listing.is_available;
+  const roommate = roommateInfo(listing);
 
   return (
     <article
@@ -67,6 +69,8 @@ export function ListingCard({ listing, now, priority }: Props) {
           <MapPin className="mt-0.5 size-4 shrink-0 text-brand-600" aria-hidden="true" />
           <span className="line-clamp-2">{listing.address}</span>
         </p>
+
+        {roommate ? <RoommateBadge info={roommate} className="self-start" /> : null}
 
         <ul className="mt-auto flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink" aria-label="Thông số chính">
           <li className="flex items-center gap-1.5">

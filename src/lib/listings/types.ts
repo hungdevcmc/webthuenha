@@ -12,6 +12,8 @@ export type ListingFilter = {
   price: "all" | "under3" | "3to5" | "5to8" | "over8";
   bedrooms: "all" | "1" | "2" | "3plus";
   district: string; // "all" hoặc tên khu vực
+  /** Chỉ dùng ở tab "Tìm bạn ở ghép" */
+  gender: "all" | "male" | "female";
 };
 
 export const DEFAULT_FILTER: ListingFilter = {
@@ -19,7 +21,39 @@ export const DEFAULT_FILTER: ListingFilter = {
   price: "all",
   bedrooms: "all",
   district: "all",
+  gender: "all",
 };
+
+/** Thông tin ở ghép của một tin, null nếu tin không bật tìm bạn ở ghép */
+export type RoommateInfo = {
+  male: number;
+  female: number;
+  total: number;
+  /** Ví dụ: "2 nam · 1 nữ" */
+  label: string;
+  note: string;
+};
+
+export function roommateInfo(listing: Listing): RoommateInfo | null {
+  if (!listing.roommate_open) return null;
+  const male = Math.max(0, listing.roommate_male_count ?? 0);
+  const female = Math.max(0, listing.roommate_female_count ?? 0);
+  const parts: string[] = [];
+  if (male > 0) parts.push(`${male} nam`);
+  if (female > 0) parts.push(`${female} nữ`);
+  return {
+    male,
+    female,
+    total: male + female,
+    label: parts.length > 0 ? parts.join(" · ") : "Chưa có ai đăng ký",
+    note: listing.roommate_note ?? "",
+  };
+}
+
+/** Chỉ giữ các tin đang tìm bạn ở ghép */
+export function onlyRoommateListings(listings: ListingWithImages[]): ListingWithImages[] {
+  return listings.filter((l) => l.roommate_open);
+}
 
 /** Tên bucket Storage chứa ảnh tin đăng */
 export const IMAGE_BUCKET = "property-images";
@@ -54,6 +88,8 @@ export function applyFilter(listings: ListingWithImages[], f: ListingFilter): Li
     if (f.status === "available" && !l.is_available) return false;
     if (f.status === "rented" && l.is_available) return false;
     if (f.district !== "all" && l.district !== f.district) return false;
+    if (f.gender === "male" && l.roommate_male_count < 1) return false;
+    if (f.gender === "female" && l.roommate_female_count < 1) return false;
     if (f.bedrooms === "1" && l.bedrooms !== 1) return false;
     if (f.bedrooms === "2" && l.bedrooms !== 2) return false;
     if (f.bedrooms === "3plus" && l.bedrooms < 3) return false;

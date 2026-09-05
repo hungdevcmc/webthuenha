@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { listingSchema } from "@/lib/listings/schema";
-import { applyFilter, sortListings, type ListingWithImages } from "@/lib/listings/types";
+import {
+  applyFilter,
+  onlyRoommateListings,
+  roommateInfo,
+  sortListings,
+  type ListingWithImages,
+} from "@/lib/listings/types";
 
 const valid = {
   title: "Phòng trọ 25 m²",
@@ -27,6 +33,10 @@ const valid = {
   contact_zalo: "",
   is_available: true,
   is_published: true,
+  roommate_open: false,
+  roommate_male_count: 0,
+  roommate_female_count: 0,
+  roommate_note: "",
   images: [],
 };
 
@@ -83,6 +93,10 @@ function make(partial: Partial<ListingWithImages>): ListingWithImages {
     contact_zalo: null,
     is_available: true,
     is_published: true,
+    roommate_open: false,
+    roommate_male_count: 0,
+    roommate_female_count: 0,
+    roommate_note: "",
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
     images: [],
@@ -98,16 +112,51 @@ describe("applyFilter / sortListings", () => {
   ];
 
   it("lọc theo giá, phòng ngủ, khu vực, trạng thái", () => {
-    expect(applyFilter(items, { status: "all", price: "under3", bedrooms: "all", district: "all" })).toHaveLength(1);
-    expect(applyFilter(items, { status: "all", price: "5to8", bedrooms: "all", district: "all" })).toHaveLength(1);
-    expect(applyFilter(items, { status: "all", price: "all", bedrooms: "3plus", district: "all" })).toHaveLength(1);
-    expect(applyFilter(items, { status: "all", price: "all", bedrooms: "all", district: "Phú Nhuận" })).toHaveLength(1);
-    expect(applyFilter(items, { status: "available", price: "all", bedrooms: "all", district: "all" })).toHaveLength(2);
-    expect(applyFilter(items, { status: "rented", price: "all", bedrooms: "all", district: "all" })).toHaveLength(1);
+    expect(applyFilter(items, { status: "all", price: "under3", bedrooms: "all", district: "all", gender: "all" })).toHaveLength(1);
+    expect(applyFilter(items, { status: "all", price: "5to8", bedrooms: "all", district: "all", gender: "all" })).toHaveLength(1);
+    expect(applyFilter(items, { status: "all", price: "all", bedrooms: "3plus", district: "all", gender: "all" })).toHaveLength(1);
+    expect(applyFilter(items, { status: "all", price: "all", bedrooms: "all", district: "Phú Nhuận", gender: "all" })).toHaveLength(1);
+    expect(applyFilter(items, { status: "available", price: "all", bedrooms: "all", district: "all", gender: "all" })).toHaveLength(2);
+    expect(applyFilter(items, { status: "rented", price: "all", bedrooms: "all", district: "all", gender: "all" })).toHaveLength(1);
   });
 
   it("còn trống xếp trước dù cập nhật cũ hơn", () => {
     const sorted = sortListings(items);
     expect(sorted[sorted.length - 1].is_available).toBe(false);
+  });
+});
+
+describe("tìm bạn ở ghép", () => {
+  const roomA = make({ roommate_open: true, roommate_male_count: 2, roommate_female_count: 1 });
+  const roomB = make({ roommate_open: true, roommate_male_count: 0, roommate_female_count: 3 });
+  const roomC = make({ roommate_open: false, roommate_male_count: 0, roommate_female_count: 0 });
+  const items = [roomA, roomB, roomC];
+
+  it("chỉ giữ tin đang bật tìm bạn ở ghép", () => {
+    expect(onlyRoommateListings(items)).toHaveLength(2);
+  });
+
+  it("trả về null khi tin không tìm bạn ở ghép", () => {
+    expect(roommateInfo(roomC)).toBeNull();
+  });
+
+  it("tính tổng số người và ghi nhãn theo giới tính", () => {
+    const info = roommateInfo(roomA);
+    expect(info?.total).toBe(3);
+    expect(info?.label).toBe("2 nam · 1 nữ");
+    expect(roommateInfo(roomB)?.label).toBe("3 nữ");
+  });
+
+  it("lọc theo giới tính người ở ghép", () => {
+    const base = { status: "all", price: "all", bedrooms: "all", district: "all" } as const;
+    expect(applyFilter(items, { ...base, gender: "male" })).toHaveLength(1);
+    expect(applyFilter(items, { ...base, gender: "female" })).toHaveLength(2);
+    expect(applyFilter(items, { ...base, gender: "all" })).toHaveLength(3);
+  });
+
+  it("bắt buộc có ít nhất một người khi bật tìm bạn ở ghép", () => {
+    const on = { ...valid, roommate_open: true, roommate_male_count: 0, roommate_female_count: 0 };
+    expect(listingSchema.safeParse(on).success).toBe(false);
+    expect(listingSchema.safeParse({ ...on, roommate_female_count: 1 }).success).toBe(true);
   });
 });

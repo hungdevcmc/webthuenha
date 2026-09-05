@@ -53,6 +53,10 @@ function defaultValues(props: Props): ListingFormInput {
       contact_zalo: l.contact_zalo,
       is_available: l.is_available,
       is_published: l.is_published,
+      roommate_open: l.roommate_open,
+      roommate_male_count: l.roommate_male_count,
+      roommate_female_count: l.roommate_female_count,
+      roommate_note: l.roommate_note,
       images: l.images.map((img) => ({
         id: img.id,
         storage_path: img.storage_path,
@@ -87,6 +91,10 @@ function defaultValues(props: Props): ListingFormInput {
     contact_zalo: siteConfig.contact.phoneRaw,
     is_available: true,
     is_published: true,
+    roommate_open: false,
+    roommate_male_count: 0,
+    roommate_female_count: 0,
+    roommate_note: "",
     images: [],
   };
 }
@@ -111,6 +119,7 @@ export function ListingForm(props: Props) {
   const price = useWatch({ control, name: "price" });
   const deposit = useWatch({ control, name: "deposit" });
   const serviceIncluded = useWatch({ control, name: "service_fee_included" });
+  const roommateOpen = useWatch({ control, name: "roommate_open" });
 
   const onSubmit = handleSubmit(
     async (values) => {
@@ -263,6 +272,60 @@ export function ListingForm(props: Props) {
         </Field>
         <Field label="Zalo" id="contact_zalo" error={err("contact_zalo")} hint="số điện thoại hoặc link zalo.me" className="sm:col-span-2">
           <Input id="contact_zalo" {...register("contact_zalo", { setValueAs: (v) => (typeof v === "string" ? v : "") })} invalid={!!errors.contact_zalo} placeholder="0901234567" />
+        </Field>
+      </Section>
+
+      <Section
+        title="Tìm bạn ở ghép"
+        description="Bật mục này để tin xuất hiện ở tab “Tìm bạn ở ghép”. Nhập số người hiện đang sẵn sàng ở ghép trong phòng."
+      >
+        <div className="sm:col-span-2">
+          <Checkbox
+            id="roommate_open"
+            label="Phòng này đang tìm bạn ở ghép"
+            description="Bỏ chọn nếu phòng không cần thêm người ở ghép"
+            {...register("roommate_open")}
+          />
+        </div>
+        <Field label="Số bạn nam sẵn sàng ở ghép" id="roommate_male_count" error={err("roommate_male_count")}>
+          <Input
+            id="roommate_male_count"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={20}
+            {...numberField("roommate_male_count")}
+            invalid={!!errors.roommate_male_count}
+            disabled={!roommateOpen}
+          />
+        </Field>
+        <Field label="Số bạn nữ sẵn sàng ở ghép" id="roommate_female_count" error={err("roommate_female_count")}>
+          <Input
+            id="roommate_female_count"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            max={20}
+            {...numberField("roommate_female_count")}
+            invalid={!!errors.roommate_female_count}
+            disabled={!roommateOpen}
+          />
+        </Field>
+        <Field
+          label="Ghi chú về việc ở ghép"
+          id="roommate_note"
+          error={err("roommate_note")}
+          hint="không bắt buộc"
+          className="sm:col-span-2"
+        >
+          <Textarea
+            id="roommate_note"
+            rows={3}
+            {...register("roommate_note")}
+            invalid={!!errors.roommate_note}
+            disabled={!roommateOpen}
+            placeholder="Ví dụ: Ưu tiên bạn nữ đi làm giờ hành chính, không nuôi thú cưng."
+          />
         </Field>
       </Section>
 

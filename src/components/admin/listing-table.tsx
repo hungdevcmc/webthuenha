@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, ImageOff, Pencil, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { deleteListing, setListingAvailability, setListingPublished } from "@/lib/listings/actions";
-import { coverImage, type ListingWithImages } from "@/lib/listings/types";
+import { coverImage, roommateInfo, type ListingWithImages } from "@/lib/listings/types";
 import { formatRelative, formatVND } from "@/lib/format";
 import { stripDiacritics } from "@/lib/slug";
 import { useListingsRealtime } from "@/hooks/use-listings-realtime";
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/form-fields";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { StatusBadge } from "@/components/listings/status-badge";
+import { RoommateBadge } from "@/components/listings/roommate-badge";
 import { EmptyState } from "@/components/listings/empty-state";
 import { cn } from "@/lib/cn";
 
@@ -149,6 +150,7 @@ export function AdminListingTable({ listings }: { listings: ListingWithImages[] 
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge isAvailable={l.is_available} />
                     {l.is_published ? <Badge tone="brand">Đang hiển thị</Badge> : <Badge tone="hidden">Đã ẩn</Badge>}
+                    {roommateInfo(l) ? <RoommateBadge info={roommateInfo(l)!} /> : null}
                     <span className="text-xs text-stone-400">Cập nhật {formatRelative(l.updated_at, now)}</span>
                   </div>
                   <h2 className="mt-1.5 truncate text-base font-semibold text-ink">

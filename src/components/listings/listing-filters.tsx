@@ -3,15 +3,18 @@
 import { SlidersHorizontal, X } from "lucide-react";
 import { Select } from "@/components/ui/form-fields";
 import { DEFAULT_FILTER, type ListingFilter } from "@/lib/listings/types";
+import { cn } from "@/lib/cn";
 
 type Props = {
   filter: ListingFilter;
   districts: string[];
   onChange: (next: ListingFilter) => void;
   resultCount: number;
+  /** Hiện thêm ô lọc theo giới tính người ở ghép (tab "Tìm bạn ở ghép") */
+  showGender?: boolean;
 };
 
-export function ListingFilters({ filter, districts, onChange, resultCount }: Props) {
+export function ListingFilters({ filter, districts, onChange, resultCount, showGender }: Props) {
   const isDefault = JSON.stringify(filter) === JSON.stringify(DEFAULT_FILTER);
   const set = <K extends keyof ListingFilter>(key: K, value: ListingFilter[K]) => onChange({ ...filter, [key]: value });
 
@@ -26,7 +29,7 @@ export function ListingFilters({ filter, districts, onChange, resultCount }: Pro
           {resultCount} kết quả
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className={cn("grid grid-cols-2 gap-3", showGender ? "md:grid-cols-3 lg:grid-cols-5" : "md:grid-cols-4")}>
         <div>
           <label htmlFor="f-status" className="mb-1 block text-xs font-medium text-muted">
             Trạng thái
@@ -73,6 +76,18 @@ export function ListingFilters({ filter, districts, onChange, resultCount }: Pro
             ))}
           </Select>
         </div>
+        {showGender ? (
+          <div>
+            <label htmlFor="f-gender" className="mb-1 block text-xs font-medium text-muted">
+              Bạn ở ghép
+            </label>
+            <Select id="f-gender" value={filter.gender} onChange={(e) => set("gender", e.target.value as ListingFilter["gender"])}>
+              <option value="all">Nam hoặc nữ</option>
+              <option value="male">Có bạn nam</option>
+              <option value="female">Có bạn nữ</option>
+            </Select>
+          </div>
+        ) : null}
       </div>
       {!isDefault ? (
         <button

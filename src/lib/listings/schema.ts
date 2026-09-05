@@ -39,7 +39,7 @@ export const listingImageSchema = z.object({
   is_cover: z.boolean(),
 });
 
-export const listingSchema = z.object({
+const listingBaseSchema = z.object({
   title: requiredText("tiêu đề", 150),
   address: requiredText("địa chỉ", 300),
   district: requiredText("khu vực (quận/huyện)", 100),
@@ -80,7 +80,28 @@ export const listingSchema = z.object({
     .transform((v) => (v ? v : null)),
   is_available: z.boolean(),
   is_published: z.boolean(),
+  roommate_open: z.boolean(),
+  roommate_male_count: smallInt("số bạn nam ở ghép", 20),
+  roommate_female_count: smallInt("số bạn nữ ở ghép", 20),
+  roommate_note: z
+    .string()
+    .trim()
+    .max(500, "Ghi chú ở ghép tối đa 500 ký tự")
+    .transform((v) => v ?? ""),
   images: z.array(listingImageSchema).max(20, "Tối đa 20 ảnh"),
+});
+
+export const listingSchema = listingBaseSchema.check((ctx) => {
+  const v = ctx.value;
+  // Đã bật tìm bạn ở ghép thì phải có ít nhất một người
+  if (v.roommate_open && v.roommate_male_count + v.roommate_female_count === 0) {
+    ctx.issues.push({
+      code: "custom",
+      input: v.roommate_male_count,
+      path: ["roommate_male_count"],
+      message: "Nhập số người sẵn sàng ở ghép (ít nhất 1 người)",
+    });
+  }
 });
 
 /** Giá trị người dùng nhập trong form (trước khi transform) */

@@ -29,6 +29,14 @@ export type PropertyRow = {
   contact_zalo: string | null;
   is_available: boolean;
   is_published: boolean;
+  /** Tin này có đang tìm bạn ở ghép không */
+  roommate_open: boolean;
+  /** Số bạn nam sẵn sàng ở ghép */
+  roommate_male_count: number;
+  /** Số bạn nữ sẵn sàng ở ghép */
+  roommate_female_count: number;
+  /** Ghi chú thêm về việc ở ghép */
+  roommate_note: string;
   created_at: string;
   updated_at: string;
 };

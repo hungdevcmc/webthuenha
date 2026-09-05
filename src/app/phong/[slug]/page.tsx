@@ -14,6 +14,7 @@ import {
   Phone,
   ReceiptText,
   Ruler,
+  Users,
   ShieldCheck,
   User,
   Zap,
@@ -21,7 +22,7 @@ import {
 import { siteConfig } from "@/config/site";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublicListingBySlug } from "@/lib/listings/queries";
-import { coverImage } from "@/lib/listings/types";
+import { coverImage, roommateInfo } from "@/lib/listings/types";
 import { formatArea, formatDateTime, formatPhone, formatUnitPrice, formatVND } from "@/lib/format";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
@@ -63,6 +64,7 @@ export default async function ListingDetailPage({ params }: Props) {
 
   const rented = !listing.is_available;
   const zalo = listing.contact_zalo;
+  const roommate = roommateInfo(listing);
 
   const specs = [
     { icon: Ruler, label: "Diện tích", value: formatArea(listing.area_m2) },
@@ -174,6 +176,32 @@ export default async function ListingDetailPage({ params }: Props) {
                     </li>
                   ))}
                 </ul>
+              </section>
+            ) : null}
+
+            {roommate ? (
+              <section aria-labelledby="roommate-heading" className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4 sm:p-5">
+                <h2 id="roommate-heading" className="flex items-center gap-2 text-lg font-bold text-ink">
+                  <Users className="size-5 text-sky-700" aria-hidden="true" />
+                  Đang tìm bạn ở ghép
+                </h2>
+                <p className="mt-2 text-ink">
+                  Hiện có <strong className="font-semibold">{roommate.total} người</strong> sẵn sàng ở ghép tại phòng này
+                  {roommate.total > 0 ? <> ({roommate.label})</> : null}.
+                </p>
+                <dl className="mt-3 grid grid-cols-2 gap-3 sm:max-w-sm">
+                  <div className="rounded-xl bg-white p-3 text-center ring-1 ring-inset ring-sky-100">
+                    <dt className="text-xs font-medium text-muted">Bạn nam</dt>
+                    <dd className="mt-0.5 text-2xl font-bold text-ink">{roommate.male}</dd>
+                  </div>
+                  <div className="rounded-xl bg-white p-3 text-center ring-1 ring-inset ring-sky-100">
+                    <dt className="text-xs font-medium text-muted">Bạn nữ</dt>
+                    <dd className="mt-0.5 text-2xl font-bold text-ink">{roommate.female}</dd>
+                  </div>
+                </dl>
+                {roommate.note ? (
+                  <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink">{roommate.note}</p>
+                ) : null}
               </section>
             ) : null}
 

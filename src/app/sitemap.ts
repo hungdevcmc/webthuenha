@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url;
-  const entries: MetadataRoute.Sitemap = [{ url: base, changeFrequency: "daily", priority: 1 }];
+  const entries: MetadataRoute.Sitemap = [
+    { url: base, changeFrequency: "daily", priority: 1 },
+    { url: `${base}/o-ghep`, changeFrequency: "daily", priority: 0.9 },
+  ];
   try {
     const supabase = await createClient();
     const { data } = await supabase.from("properties").select("slug, updated_at").eq("is_published", true);

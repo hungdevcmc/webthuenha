@@ -32,6 +32,12 @@ export const siteConfig = {
   /** Mô tả dùng cho SEO / chia sẻ mạng xã hội */
   description:
     "Cho thuê phòng trọ, căn hộ mini và nhà nguyên căn. Giá minh bạch, không môi giới, liên hệ trực tiếp chủ nhà.",
+  /** Nội dung tab "Tìm bạn ở ghép" */
+  roommate: {
+    title: "Tìm bạn ở ghép",
+    intro:
+      "Những phòng dưới đây đang cần thêm người ở ghép để chia tiền thuê. Mỗi tin ghi rõ hiện có mấy bạn nam, mấy bạn nữ để bạn dễ chọn phòng phù hợp.",
+  },
   /** Thông tin liên hệ mặc định (dùng khi tin đăng không ghi riêng) */
   contact: {
     name: "Anh Hưng (chủ nhà)",

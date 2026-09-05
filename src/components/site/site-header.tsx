@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Home, Phone } from "lucide-react";
 import { siteConfig, telLink } from "@/config/site";
 import { buttonClasses } from "@/components/ui/button";
+import { SiteNav } from "./site-nav";
 
 export function SiteHeader() {
   const tel = telLink(siteConfig.contact.phoneRaw);
@@ -21,6 +22,7 @@ export function SiteHeader() {
           </a>
         ) : null}
       </div>
+      <SiteNav />
     </header>
   );
 }

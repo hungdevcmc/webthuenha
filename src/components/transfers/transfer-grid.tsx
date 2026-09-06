@@ -10,6 +10,7 @@ import {
   type TransferFilter,
   type TransferWithImages,
 } from "@/lib/transfers/types";
+import type { TransferKind } from "@/lib/transfers/schema";
 import { useTransfersRealtime } from "@/hooks/use-transfers-realtime";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/listings/empty-state";
@@ -20,13 +21,15 @@ type Props = {
   initialPosts: TransferWithImages[];
   /** Lỗi khi tải ở server (nếu có) */
   initialError?: string | null;
+  /** "room" là pass cả phòng, "slot" là pass slot trong phòng */
+  kind?: TransferKind;
 };
 
 /**
  * Danh sách tin pass phòng ở trang công khai. Nhận dữ liệu ban đầu từ server,
  * sau đó tự đồng bộ qua Realtime mà không tải lại trang.
  */
-export function TransferGrid({ initialPosts, initialError = null }: Props) {
+export function TransferGrid({ initialPosts, initialError = null, kind = "room" }: Props) {
   const [posts, setPosts] = useState(initialPosts);
   const [error, setError] = useState<string | null>(initialError);
   const [refreshing, setRefreshing] = useState(false);
@@ -47,7 +50,7 @@ export function TransferGrid({ initialPosts, initialError = null }: Props) {
     setRefreshing(true);
     try {
       const supabase = createClient();
-      const data = await fetchPublicTransfers(supabase);
+      const data = await fetchPublicTransfers(supabase, kind);
       if (id !== requestId.current) return;
       setPosts(data);
       setError(null);
@@ -58,7 +61,7 @@ export function TransferGrid({ initialPosts, initialError = null }: Props) {
     } finally {
       if (id === requestId.current) setRefreshing(false);
     }
-  }, []);
+  }, [kind]);
 
   useTransfersRealtime({ onChange: () => void refresh() });
 
@@ -95,8 +98,12 @@ export function TransferGrid({ initialPosts, initialError = null }: Props) {
 
       {posts.length === 0 && !error ? (
         <EmptyState
-          title="Chưa có ai đăng tin pass phòng"
-          description="Bạn đang cần nhượng lại phòng đang thuê? Hãy là người đăng tin đầu tiên, chỉ mất khoảng hai phút."
+          title={kind === "slot" ? "Chưa có ai đăng tin pass slot" : "Chưa có ai đăng tin pass phòng"}
+          description={
+            kind === "slot"
+              ? "Bạn đang ở ghép và muốn nhượng lại chỗ của mình? Hãy là người đăng tin đầu tiên, chỉ mất khoảng hai phút."
+              : "Bạn đang cần nhượng lại phòng đang thuê? Hãy là người đăng tin đầu tiên, chỉ mất khoảng hai phút."
+          }
         />
       ) : visible.length === 0 ? (
         <EmptyState

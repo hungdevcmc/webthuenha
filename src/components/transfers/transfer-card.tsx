@@ -2,16 +2,18 @@ import Link from "next/link";
 import { Bath, BedDouble, ImageOff, MapPin, Ruler } from "lucide-react";
 import { SafeImage } from "@/components/listings/safe-image";
 import { formatArea, formatRelative, formatVND } from "@/lib/format";
-import { transferCover, type TransferWithImages } from "@/lib/transfers/types";
+import { kindBasePath, priceSuffix, transferCover, type TransferWithImages } from "@/lib/transfers/types";
 import { cn } from "@/lib/cn";
 import { DistanceBadge } from "@/components/listings/distance-badge";
-import { ContractBadge, DepositBadge, TransferStatusBadge } from "./transfer-badges";
+import { ContractBadge, DepositBadge, RoomGenderBadge, SlotBadge, TransferStatusBadge } from "./transfer-badges";
 
 type Props = { post: TransferWithImages; now: number; priority?: boolean };
 
 export function TransferCard({ post, now, priority }: Props) {
   const cover = transferCover(post);
   const done = post.is_transferred;
+  const base = kindBasePath(post.kind);
+  const isSlot = post.kind === "slot";
 
   return (
     <article
@@ -21,7 +23,7 @@ export function TransferCard({ post, now, priority }: Props) {
       )}
     >
       <Link
-        href={`/pass-phong/${post.slug}`}
+        href={`${base}/${post.slug}`}
         className="relative block aspect-[4/3] overflow-hidden bg-stone-100"
         aria-label={`Xem chi tiết: ${post.title}`}
       >
@@ -55,11 +57,11 @@ export function TransferCard({ post, now, priority }: Props) {
         <div>
           <p className={cn("text-xl font-bold tracking-tight", done ? "text-stone-500" : "text-accent-600")}>
             {formatVND(post.price)}
-            <span className="text-sm font-medium text-muted">/tháng</span>
+            <span className="text-sm font-medium text-muted">{priceSuffix(post.kind)}</span>
           </p>
           <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-snug text-ink">
             <Link
-              href={`/pass-phong/${post.slug}`}
+              href={`${base}/${post.slug}`}
               className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
             >
               {post.title}
@@ -75,6 +77,8 @@ export function TransferCard({ post, now, priority }: Props) {
         <div className="flex flex-wrap gap-1.5">
           <ContractBadge date={post.contract_end_date} now={now} withDate={false} />
           <DepositBadge months={post.deposit_months} />
+          {isSlot ? <SlotBadge count={post.slot_count} /> : null}
+          {isSlot ? <RoomGenderBadge gender={post.room_gender} /> : null}
           <DistanceBadge km={post.distance_to_school_km} />
         </div>
 

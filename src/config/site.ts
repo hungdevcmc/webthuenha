@@ -40,6 +40,12 @@ export const siteConfig = {
     /** Chữ trên nút đăng ký ở ghép (bấm vào mở Zalo của chủ nhà) */
     signUpLabel: "Đăng ký ở ghép",
   },
+  /** Nội dung tab "Pass slot phòng" (tin do khách tự đăng) */
+  slotTransfer: {
+    title: "Pass slot phòng",
+    intro:
+      "Nơi các bạn đang ở ghép nhượng lại chỗ của mình trong phòng. Mỗi tin ghi rõ pass mấy slot, giá một slot mỗi tháng, phòng dành cho nam hay nữ và hợp đồng còn hạn tới ngày nào.",
+  },
   /** Trường học dùng làm mốc đo khoảng cách của mỗi phòng */
   school: {
     /** Tên đầy đủ, hiện trong nhãn và form */

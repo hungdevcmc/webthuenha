@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { distanceField, listingImageSchema } from "@/lib/listings/schema";
+import { ROOMMATE_GENDERS, distanceField, listingImageSchema } from "@/lib/listings/schema";
 
 const requiredText = (label: string, max = 200) =>
   z
@@ -31,6 +31,10 @@ const optionalSmallInt = (label: string, max: number) =>
     .nullable();
 
 const phoneRegex = /^(\+84|0)\d{8,10}$/;
+
+/** Hai loại tin nhượng lại: cả phòng hoặc một slot trong phòng */
+export const TRANSFER_KINDS = ["room", "slot"] as const;
+export type TransferKind = (typeof TRANSFER_KINDS)[number];
 
 /** Số tháng tiền cọc mà người nhận phòng phải đóng */
 export const DEPOSIT_MONTHS = [1, 3] as const;
@@ -85,6 +89,22 @@ const transferBaseSchema = z.object({
   floor: optionalSmallInt("tầng", 200),
   total_floors: optionalSmallInt("tổng số tầng", 200),
   distance_to_school_km: distanceField,
+  kind: z.enum(TRANSFER_KINDS).default("room"),
+  /** Chỉ dùng khi kind = "slot" */
+  slot_count: z
+    .number({ error: "Vui lòng nhập số slot" })
+    .int("Số slot phải là số nguyên")
+    .min(1, "Phải pass ít nhất 1 slot")
+    .max(10, "Tối đa 10 slot")
+    .nullable()
+    .default(null),
+  room_gender: z.enum(ROOMMATE_GENDERS, { error: "Vui lòng chọn phòng dành cho ai" }).default("any"),
+  people_in_room: z
+    .number({ error: "Số người đang ở phải là số" })
+    .int("Số người đang ở phải là số nguyên")
+    .min(0, "Số người đang ở không được âm")
+    .max(20, "Số người đang ở tối đa 20")
+    .default(0),
   amenities: z.array(z.string().trim().min(1).max(60)).max(50, "Tối đa 50 tiện nghi"),
   description: z
     .string({ error: "Vui lòng nhập mô tả" })
@@ -106,16 +126,31 @@ const transferBaseSchema = z.object({
   images: z.array(listingImageSchema).max(12, "Tối đa 12 ảnh"),
 });
 
-/** Dữ liệu khách gửi lên khi tự đăng tin pass phòng */
-export const transferPostSchema = transferBaseSchema;
+/** Tin pass slot bắt buộc có số slot; tin pass cả phòng thì bỏ trống */
+function checkSlotCount(ctx: { value: { kind: TransferKind; slot_count: number | null }; issues: unknown[] }) {
+  const v = ctx.value;
+  if (v.kind === "slot" && (v.slot_count === null || v.slot_count < 1)) {
+    (ctx.issues as { code: string; input: unknown; path: string[]; message: string }[]).push({
+      code: "custom",
+      input: v.slot_count,
+      path: ["slot_count"],
+      message: "Nhập số slot bạn muốn pass lại",
+    });
+  }
+}
+
+/** Dữ liệu khách gửi lên khi tự đăng tin pass phòng hoặc pass slot */
+export const transferPostSchema = transferBaseSchema.check(checkSlotCount);
 
 /**
  * Dữ liệu admin sửa tin: có thêm hai trạng thái mà khách không được tự đặt.
  */
-export const transferPostAdminSchema = transferBaseSchema.extend({
-  is_published: z.boolean(),
-  is_transferred: z.boolean(),
-});
+export const transferPostAdminSchema = transferBaseSchema
+  .extend({
+    is_published: z.boolean(),
+    is_transferred: z.boolean(),
+  })
+  .check(checkSlotCount);
 
 export type TransferFormInput = z.input<typeof transferPostSchema>;
 export type TransferFormValues = z.output<typeof transferPostSchema>;

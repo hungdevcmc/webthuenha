@@ -7,7 +7,8 @@ import { Eye, EyeOff, ImageOff, Pencil, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { SafeImage } from "@/components/listings/safe-image";
 import { deleteTransferPost, setTransferDone, setTransferPublished } from "@/lib/transfers/actions";
-import { transferCover, type TransferWithImages } from "@/lib/transfers/types";
+import { priceSuffix, transferCover, type TransferWithImages } from "@/lib/transfers/types";
+import type { TransferKind } from "@/lib/transfers/schema";
 import { formatDate, formatRelative, formatVND } from "@/lib/format";
 import { stripDiacritics } from "@/lib/slug";
 import { useTransfersRealtime } from "@/hooks/use-transfers-realtime";
@@ -16,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/form-fields";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/listings/empty-state";
-import { ContractBadge, DepositBadge, TransferStatusBadge } from "@/components/transfers/transfer-badges";
+import { ContractBadge, DepositBadge, RoomGenderBadge, SlotBadge, TransferStatusBadge } from "@/components/transfers/transfer-badges";
 import { cn } from "@/lib/cn";
 
 type Quick = "all" | "open" | "done" | "published" | "hidden";
@@ -33,7 +34,12 @@ function normalizeText(s: string) {
   return stripDiacritics(s).toLowerCase();
 }
 
-export function AdminTransferTable({ posts }: { posts: TransferWithImages[] }) {
+/** Đường dẫn trang sửa tin trong khu quản trị, theo loại tin */
+function adminBase(kind: TransferKind): string {
+  return kind === "slot" ? "/admin/pass-slot" : "/admin/pass-phong";
+}
+
+export function AdminTransferTable({ posts, kind = "room" }: { posts: TransferWithImages[]; kind?: TransferKind }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [quick, setQuick] = useState<Quick>("all");
@@ -117,8 +123,12 @@ export function AdminTransferTable({ posts }: { posts: TransferWithImages[] }) {
 
       {posts.length === 0 ? (
         <EmptyState
-          title="Chưa có tin pass phòng nào"
-          description="Khi khách đăng tin ở tab “Pass lại phòng”, tin sẽ hiện tại đây để bạn kiểm duyệt."
+          title={kind === "slot" ? "Chưa có tin pass slot nào" : "Chưa có tin pass phòng nào"}
+          description={
+            kind === "slot"
+              ? "Khi khách đăng tin ở tab “Pass slot phòng”, tin sẽ hiện tại đây để bạn kiểm duyệt."
+              : "Khi khách đăng tin ở tab “Pass lại phòng”, tin sẽ hiện tại đây để bạn kiểm duyệt."
+          }
         />
       ) : visible.length === 0 ? (
         <EmptyState
@@ -159,17 +169,19 @@ export function AdminTransferTable({ posts }: { posts: TransferWithImages[] }) {
                     {p.is_published ? <Badge tone="brand">Đang hiển thị</Badge> : <Badge tone="hidden">Đã ẩn</Badge>}
                     <ContractBadge date={p.contract_end_date} now={now} withDate={false} />
                     <DepositBadge months={p.deposit_months} />
+                    {p.kind === "slot" ? <SlotBadge count={p.slot_count} /> : null}
+                    {p.kind === "slot" ? <RoomGenderBadge gender={p.room_gender} /> : null}
                     <span className="text-xs text-stone-400">Đăng {formatRelative(p.created_at, now)}</span>
                   </div>
                   <h2 className="mt-1.5 truncate text-base font-semibold text-ink">
-                    <Link href={`/admin/pass-phong/${p.id}/chinh-sua`} className="hover:text-brand-700">
+                    <Link href={`${adminBase(p.kind)}/${p.id}/chinh-sua`} className="hover:text-brand-700">
                       {p.title}
                     </Link>
                   </h2>
                   <p className="truncate text-sm text-muted">{p.address}</p>
                   <p className="mt-1 text-sm font-semibold text-accent-600">
                     {formatVND(p.price)}
-                    <span className="font-normal text-muted">/tháng</span>
+                    <span className="font-normal text-muted">{priceSuffix(p.kind)}</span>
                     <span className="ml-3 font-normal text-muted">
                       Hết hạn {formatDate(`${p.contract_end_date}T00:00:00`)} · {p.images.length} ảnh
                     </span>
@@ -180,7 +192,7 @@ export function AdminTransferTable({ posts }: { posts: TransferWithImages[] }) {
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Link
-                      href={`/admin/pass-phong/${p.id}/chinh-sua`}
+                      href={`${adminBase(p.kind)}/${p.id}/chinh-sua`}
                       className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-stone-300 bg-white px-3 text-sm font-semibold hover:bg-stone-50"
                     >
                       <Pencil className="size-4" aria-hidden="true" />
@@ -239,7 +251,7 @@ export function AdminTransferTable({ posts }: { posts: TransferWithImages[] }) {
 
       <ConfirmDialog
         open={toDelete !== null}
-        title="Xóa tin pass phòng này?"
+        title={kind === "slot" ? "Xóa tin pass slot này?" : "Xóa tin pass phòng này?"}
         description={
           toDelete
             ? `“${toDelete.title}” cùng ${toDelete.images.length} ảnh sẽ bị xóa vĩnh viễn. Không thể hoàn tác.`

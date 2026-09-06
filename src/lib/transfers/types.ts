@@ -34,6 +34,28 @@ export const DEFAULT_TRANSFER_FILTER: TransferFilter = {
   district: "all",
 };
 
+/** Nhãn theo loại tin, dùng cho tiêu đề và chữ trên nút */
+export function kindLabel(kind: TransferPost["kind"]): string {
+  return kind === "slot" ? "Pass slot phòng" : "Pass lại phòng";
+}
+
+/** Đơn vị giá theo loại tin: một slot hay cả phòng */
+export function priceSuffix(kind: TransferPost["kind"]): string {
+  return kind === "slot" ? "/slot/tháng" : "/tháng";
+}
+
+/** Đường dẫn gốc của tab tương ứng với loại tin */
+export function kindBasePath(kind: TransferPost["kind"]): string {
+  return kind === "slot" ? "/pass-slot" : "/pass-phong";
+}
+
+/** Nhãn tiếng Việt cho việc phòng dành cho ai */
+export function roomGenderLabel(gender: TransferPost["room_gender"]): string {
+  if (gender === "male") return "Phòng nam";
+  if (gender === "female") return "Phòng nữ";
+  return "Nam hoặc nữ";
+}
+
 /** Nhãn hiển thị cho mức cọc */
 export function depositLabel(months: number): string {
   return `Cọc ${months} tháng`;

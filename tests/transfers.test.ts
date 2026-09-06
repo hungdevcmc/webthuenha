@@ -5,6 +5,9 @@ import {
   daysUntil,
   DEFAULT_TRANSFER_FILTER,
   depositLabel,
+  kindBasePath,
+  priceSuffix,
+  roomGenderLabel,
   sortTransferPosts,
   type TransferFilter,
   type TransferWithImages,
@@ -42,6 +45,10 @@ function makePost(over: Partial<TransferWithImages> = {}): TransferWithImages {
     floor: null,
     total_floors: null,
     distance_to_school_km: null,
+    kind: "room" as const,
+    slot_count: null,
+    room_gender: "any" as const,
+    people_in_room: 0,
     amenities: [],
     description: "Phòng sạch, đầy đủ nội thất, cần pass lại vì chuyển công tác.",
     contact_name: "Chị Lan",
@@ -177,5 +184,78 @@ describe("kiểm tra dữ liệu form đăng tin", () => {
     const parsed = transferPostSchema.parse({ ...valid, is_published: false, is_transferred: true });
     expect("is_published" in parsed).toBe(false);
     expect("is_transferred" in parsed).toBe(false);
+  });
+});
+
+describe("pass slot phòng", () => {
+  const slotBase = {
+    ...{
+      title: "Pass lại 1 slot phòng nữ",
+      address: "Tòa S2.03, Vinhomes Ocean Park",
+      district: "Quận Gia Lâm",
+      city: "Thành phố Hà Nội",
+      price: 2_800_000,
+      deposit: 2_800_000,
+      deposit_months: 1,
+      contract_end_date: isoInDays(120),
+      electricity_price: 3500,
+      electricity_unit: "kWh",
+      water_price: 20000,
+      water_unit: "m³",
+      service_fee: 0,
+      service_fee_included: false,
+      area_m2: 86,
+      bedrooms: 2,
+      bathrooms: 2,
+      floor: null,
+      total_floors: null,
+      amenities: [],
+      description: "Mình đi thực tập xa nên cần pass lại một slot trong phòng nữ ba bạn.",
+      contact_name: "Bạn Mai",
+      contact_phone: "0977123456",
+      contact_zalo: null,
+      images: [],
+    },
+    kind: "slot" as const,
+    slot_count: 1,
+    room_gender: "female" as const,
+    people_in_room: 2,
+  };
+
+  it("nhận tin pass slot hợp lệ", () => {
+    expect(transferPostSchema.safeParse(slotBase).success).toBe(true);
+  });
+
+  it("tin pass slot bắt buộc có số slot", () => {
+    expect(transferPostSchema.safeParse({ ...slotBase, slot_count: null }).success).toBe(false);
+    expect(transferPostSchema.safeParse({ ...slotBase, slot_count: 0 }).success).toBe(false);
+    expect(transferPostSchema.safeParse({ ...slotBase, slot_count: 11 }).success).toBe(false);
+  });
+
+  it("tin pass cả phòng không cần số slot", () => {
+    const room = { ...slotBase, kind: "room" as const, slot_count: null };
+    expect(transferPostSchema.safeParse(room).success).toBe(true);
+  });
+
+  it("mặc định là tin pass cả phòng khi không gửi loại", () => {
+    const withoutKind: Record<string, unknown> = { ...slotBase };
+    delete withoutKind.kind;
+    delete withoutKind.slot_count;
+    const parsed = transferPostSchema.parse(withoutKind);
+    expect(parsed.kind).toBe("room");
+    expect(parsed.slot_count).toBeNull();
+  });
+
+  it("đơn vị giá và đường dẫn khác nhau theo loại tin", () => {
+    expect(priceSuffix("slot")).toBe("/slot/tháng");
+    expect(priceSuffix("room")).toBe("/tháng");
+    expect(kindBasePath("slot")).toBe("/pass-slot");
+    expect(kindBasePath("room")).toBe("/pass-phong");
+  });
+
+  it("nhãn phòng dành cho ai", () => {
+    expect(roomGenderLabel("male")).toBe("Phòng nam");
+    expect(roomGenderLabel("female")).toBe("Phòng nữ");
+    expect(roomGenderLabel("any")).toBe("Nam hoặc nữ");
   });
 });

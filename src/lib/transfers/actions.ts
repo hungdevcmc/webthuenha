@@ -114,6 +114,11 @@ function postPayload(values: TransferFormValues) {
     floor: values.floor,
     total_floors: values.total_floors,
     distance_to_school_km: values.distance_to_school_km,
+    kind: values.kind,
+    // Chỉ tin pass slot mới có số slot, tin pass cả phòng để trống
+    slot_count: values.kind === "slot" ? values.slot_count : null,
+    room_gender: values.room_gender,
+    people_in_room: values.people_in_room,
     amenities: values.amenities,
     description: values.description,
     contact_name: values.contact_name,

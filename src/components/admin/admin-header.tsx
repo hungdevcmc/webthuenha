@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, LayoutList, Plus, Repeat2, Users } from "lucide-react";
+import { ExternalLink, LayoutList, Plus, Repeat2, TicketCheck, Users } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { buttonClasses } from "@/components/ui/button";
 import { SignOutButton } from "./sign-out-button";
@@ -27,6 +27,11 @@ export function AdminHeader({ email }: { email: string }) {
             <Repeat2 className="size-4" aria-hidden="true" />
             <span className="hidden sm:inline">Tin pass phòng</span>
             <span className="sm:hidden">Pass phòng</span>
+          </Link>
+          <Link href="/admin/pass-slot" className={buttonClasses("ghost", "sm")}>
+            <TicketCheck className="size-4" aria-hidden="true" />
+            <span className="hidden sm:inline">Tin pass slot</span>
+            <span className="sm:hidden">Pass slot</span>
           </Link>
           <Link href="/" target="_blank" rel="noopener" className={buttonClasses("ghost", "sm", "hidden md:inline-flex")}>
             <ExternalLink className="size-4" aria-hidden="true" />

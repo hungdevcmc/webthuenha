@@ -4,11 +4,12 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarClock, Save, Send, Wallet } from "lucide-react";
+import { CalendarClock, Save, Send, UserRound, Users, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { siteConfig } from "@/config/site";
 import { ELECTRICITY_UNITS, WATER_UNITS } from "@/lib/listings/schema";
 import { createTransferPost, updateTransferPost } from "@/lib/transfers/actions";
+import { ROOMMATE_GENDERS } from "@/lib/listings/schema";
 import {
   DEPOSIT_MONTHS,
   TRANSFER_IMAGE_MAX_COUNT,
@@ -18,8 +19,9 @@ import {
   type TransferAdminFormInput,
   type TransferAdminFormValues,
   type TransferFormValues,
+  type TransferKind,
 } from "@/lib/transfers/schema";
-import type { TransferWithImages } from "@/lib/transfers/types";
+import { kindBasePath, roomGenderLabel, type TransferWithImages } from "@/lib/transfers/types";
 import { formatVND } from "@/lib/format";
 import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes";
 import { Button } from "@/components/ui/button";
@@ -27,7 +29,9 @@ import { Checkbox, FieldError, Input, Label, Select, Textarea } from "@/componen
 import { AmenitiesField } from "@/components/admin/amenities-field";
 import { ImageUploader } from "@/components/admin/image-uploader";
 
-type Props = { mode: "create" } | { mode: "edit"; post: TransferWithImages };
+type Props =
+  | { mode: "create"; kind?: TransferKind }
+  | { mode: "edit"; post: TransferWithImages };
 
 /** Ngày hôm nay dạng YYYY-MM-DD, dùng làm giá trị nhỏ nhất cho ô chọn ngày */
 function todayISO(): string {
@@ -73,6 +77,10 @@ function defaultValues(props: Props): TransferAdminFormInput {
       floor: p.floor,
       total_floors: p.total_floors,
       distance_to_school_km: p.distance_to_school_km === null ? null : Number(p.distance_to_school_km),
+      kind: p.kind,
+      slot_count: p.slot_count,
+      room_gender: p.room_gender,
+      people_in_room: p.people_in_room,
       amenities: p.amenities,
       description: p.description,
       contact_name: p.contact_name,
@@ -110,6 +118,10 @@ function defaultValues(props: Props): TransferAdminFormInput {
     floor: null,
     total_floors: null,
     distance_to_school_km: null,
+    kind: props.kind ?? "room",
+    slot_count: props.kind === "slot" ? 1 : null,
+    room_gender: "any",
+    people_in_room: 0,
     amenities: [],
     description: "",
     contact_name: "",
@@ -127,6 +139,8 @@ const toNullableNumber = (v: unknown) => (v === "" || v === null || v === undefi
 export function TransferForm(props: Props) {
   const router = useRouter();
   const isAdmin = props.mode === "edit";
+  const kind: TransferKind = props.mode === "edit" ? props.post.kind : (props.kind ?? "room");
+  const isSlot = kind === "slot";
   const [saved, setSaved] = useState(false);
   // Mốc mở form, dùng để chặn bot gửi ngay lập tức. Tính một lần khi khởi tạo.
   const [openedAt] = useState(() => Date.now());
@@ -169,8 +183,8 @@ export function TransferForm(props: Props) {
         form.reset(values);
         router.refresh();
       } else {
-        toast.success("Đã đăng tin pass phòng");
-        router.push(`/pass-phong/${result.data.slug}`);
+        toast.success(isSlot ? "Đã đăng tin pass slot" : "Đã đăng tin pass phòng");
+        router.push(`${kindBasePath(kind)}/${result.data.slug}`);
       }
     },
     () => {
@@ -193,6 +207,65 @@ export function TransferForm(props: Props) {
         aria-hidden="true"
         className="absolute left-[-9999px] size-0 opacity-0"
       />
+
+      {isSlot ? (
+        <Section
+          title="Slot bạn muốn pass"
+          description="Cho người xem biết họ sẽ nhận mấy chỗ và ở cùng những ai trong phòng."
+          highlight
+        >
+          <Field label="Số slot muốn pass lại" id="slot_count" required error={err("slot_count")}>
+            <div className="relative">
+              <Users
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-600"
+                aria-hidden="true"
+              />
+              <Input
+                id="slot_count"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={10}
+                className="pl-9"
+                {...numberField("slot_count", true)}
+                invalid={!!errors.slot_count}
+                placeholder="1"
+              />
+            </div>
+          </Field>
+          <Field
+            label="Số người đang ở trong phòng"
+            id="people_in_room"
+            error={err("people_in_room")}
+            hint="không tính bạn"
+          >
+            <Input
+              id="people_in_room"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={20}
+              {...numberField("people_in_room")}
+              invalid={!!errors.people_in_room}
+            />
+          </Field>
+          <Field label="Phòng dành cho" id="room_gender" error={err("room_gender")} className="sm:col-span-2">
+            <div className="relative">
+              <UserRound
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-brand-600"
+                aria-hidden="true"
+              />
+              <Select id="room_gender" className="pl-9" {...register("room_gender")} invalid={!!errors.room_gender}>
+                {ROOMMATE_GENDERS.map((g) => (
+                  <option key={g} value={g}>
+                    {roomGenderLabel(g)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </Field>
+        </Section>
+      ) : null}
 
       <Section
         title="Điều kiện pass lại"
@@ -265,7 +338,11 @@ export function TransferForm(props: Props) {
             id="title"
             {...register("title")}
             invalid={!!errors.title}
-            placeholder="Ví dụ: Pass lại phòng 25 m² có gác, gần Đại học VinUni"
+            placeholder={
+              isSlot
+                ? "Ví dụ: Pass lại 1 slot phòng nữ, tòa S2.03 Ocean Park"
+                : "Ví dụ: Pass lại phòng 25 m² có gác, gần Đại học VinUni"
+            }
           />
         </Field>
         <Field label="Địa chỉ đầy đủ" id="address" required error={err("address")} className="sm:col-span-2">
@@ -281,7 +358,7 @@ export function TransferForm(props: Props) {
 
       <Section title="Giá và chi phí" description="Ghi đúng số tiền (VND). Ví dụ 3500000 cho 3,5 triệu.">
         <Field
-          label="Giá thuê / tháng"
+          label={isSlot ? "Giá một slot / tháng" : "Giá thuê / tháng"}
           id="price"
           required
           error={err("price")}
@@ -524,7 +601,15 @@ export function TransferForm(props: Props) {
             <Button
               variant="secondary"
               className="flex-1 sm:flex-none"
-              onClick={() => router.push(isAdmin ? "/admin/pass-phong" : "/pass-phong")}
+              onClick={() =>
+                router.push(
+                  isAdmin
+                    ? kind === "slot"
+                      ? "/admin/pass-slot"
+                      : "/admin/pass-phong"
+                    : kindBasePath(kind),
+                )
+              }
               disabled={isSubmitting}
             >
               Hủy

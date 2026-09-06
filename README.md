@@ -4,8 +4,8 @@
 
 Website gồm hai khu vực tách biệt:
 
-- **Trang công khai** cho khách thuê: ba tab – `/` xem toàn bộ phòng, `/o-ghep` xem những phòng đang tìm bạn ở ghép, `/pass-phong` xem những phòng đang cần nhượng lại. Lọc, xem chi tiết, gọi điện / nhắn Zalo. Không cần đăng ký hay đăng nhập.
-- **Khách tự đăng tin pass phòng** tại `/pass-phong/dang-tin`: không cần tài khoản, tin hiện ngay. Admin có quyền sửa, ẩn hoặc xóa các tin này.
+- **Trang công khai** cho khách thuê: bốn tab – `/` xem toàn bộ phòng, `/o-ghep` xem những phòng đang tìm bạn ở ghép, `/pass-phong` xem những phòng đang cần nhượng lại, `/pass-slot` xem những chỗ ở ghép đang cần nhượng lại. Lọc, xem chi tiết, gọi điện / nhắn Zalo. Không cần đăng ký hay đăng nhập.
+- **Khách tự đăng tin** tại `/pass-phong/dang-tin` (pass cả phòng) và `/pass-slot/dang-tin` (pass một slot): không cần tài khoản, tin hiện ngay. Admin có quyền sửa, ẩn hoặc xóa các tin này.
 - **Trang quản trị** tại `/admin`: bắt buộc đăng nhập, dùng để thêm, sửa, ẩn/hiện, xóa tin và quản lý ảnh.
 
 Công nghệ: Next.js 16 (App Router, TypeScript), Tailwind CSS 4, Supabase (PostgreSQL + Auth + Storage + Realtime), triển khai trên Vercel. Toàn bộ đều dùng gói miễn phí.
@@ -32,6 +32,7 @@ Mọi nội dung thương hiệu nằm trong **một file duy nhất**: [`src/co
 | Chữ trên nút đăng ký ở ghép | `roommate.signUpLabel` |
 | Tên trường dùng làm mốc đo khoảng cách | `school.name`, `school.shortName` |
 | Tiêu đề và lời giới thiệu tab Pass lại phòng | `transfer.title`, `transfer.intro` |
+| Tiêu đề và lời giới thiệu tab Pass slot phòng | `slotTransfer.title`, `slotTransfer.intro` |
 
 Sửa xong thì lưu file, chạy lại (`npm run dev`) hoặc đẩy lên Git để Vercel tự triển khai.
 
@@ -144,7 +145,11 @@ src/
     pass-phong/page.tsx                   Tab "Pass lại phòng"
     pass-phong/dang-tin/page.tsx          Form khách tự đăng tin pass phòng
     pass-phong/[slug]/page.tsx            Chi tiết một tin pass phòng
+    pass-slot/page.tsx                    Tab "Pass slot phòng"
+    pass-slot/dang-tin/page.tsx           Form khách tự đăng tin pass slot
+    pass-slot/[slug]/page.tsx             Chi tiết một tin pass slot
     admin/(dashboard)/pass-phong/         Quản trị tin pass phòng
+    admin/(dashboard)/pass-slot/          Quản trị tin pass slot
     phong/[slug]/page.tsx                 Trang chi tiết một phòng
     admin/login/page.tsx                  Đăng nhập quản trị
     admin/(dashboard)/page.tsx            Danh sách tin (quản trị)
@@ -176,7 +181,7 @@ tests/          Kiểm thử đơn vị (Vitest)
 | --- | --- |
 | `properties` | Tin đăng: tiêu đề, địa chỉ, giá, cọc, điện, nước, phí dịch vụ, diện tích, số phòng, tầng, tiện nghi, mô tả, liên hệ, `is_available`, `is_published`, `slug` duy nhất, `created_at`, `updated_at`, `distance_to_school_km` (khoảng cách tới trường), và nhóm ở ghép `roommate_open`, `roommate_slot_price` (giá một chỗ/tháng), `roommate_gender` (phòng nam/nữ/cả hai), `roommate_male_count`, `roommate_female_count`, `roommate_note` |
 | `property_images` | Ảnh của tin: `storage_path`, `url`, `sort_order`, `is_cover`. Xóa tin thì ảnh xóa theo |
-| `transfer_posts` | Tin pass phòng do **khách tự đăng**: đủ thông tin phòng như trên, cộng thêm `contract_end_date` (ngày hết hạn hợp đồng), `deposit_months` (cọc 1 hay cọc 3 tháng), `distance_to_school_km`, `is_transferred` (đã pass xong chưa), `is_published` |
+| `transfer_posts` | Tin pass phòng do **khách tự đăng**: đủ thông tin phòng như trên, cộng thêm `contract_end_date` (ngày hết hạn hợp đồng), `deposit_months` (cọc 1 hay cọc 3 tháng), `distance_to_school_km`, `is_transferred` (đã pass xong chưa), `is_published`. Cột `kind` phân biệt hai loại: `room` là pass cả phòng, `slot` là pass một chỗ trong phòng (kèm `slot_count`, `room_gender`, `people_in_room`) |
 | `transfer_post_images` | Ảnh của tin pass phòng. Xóa tin thì ảnh xóa theo |
 | `admin_users` | Danh sách user được quyền quản trị, liên kết `auth.users` |
 
@@ -276,3 +281,31 @@ Mỗi phòng và mỗi tin pass phòng có một ô **Khoảng cách tới trư�
 trong bảng thông số ở trang chi tiết.
 
 Đổi tên trường ở `school.name` và `school.shortName` trong `src/config/site.ts`.
+
+## 14. Tab "Pass slot phòng"
+
+Tab này ở địa chỉ `/pass-slot`, dành cho bạn **đang ở ghép** và muốn nhượng lại **chỗ của mình**
+trong một phòng đã có người ở. Khác với `/pass-phong` là nhượng cả phòng.
+
+**Khách đăng tin:** bấm **Đăng tin pass slot** trên tab đó (hoặc vào `/pass-slot/dang-tin`).
+Các trường giống hệt tin pass phòng — hạn hợp đồng, mức cọc 1 hay 3 tháng, chi phí điện nước dịch
+vụ, ảnh, liên hệ — cộng thêm một khối riêng ở đầu form:
+
+| Trường | Ý nghĩa |
+| --- | --- |
+| Số slot muốn pass lại | Bắt buộc, từ 1 tới 10 |
+| Số người đang ở trong phòng | Không tính người đăng, để người xem biết sẽ ở cùng mấy bạn |
+| Phòng dành cho | Phòng nam, Phòng nữ, hoặc Nam hoặc nữ |
+
+Giá ở tab này là **giá một slot mỗi tháng**, hiển thị kèm đuôi "/slot/tháng" để không lẫn với giá
+cả phòng bên tab pass phòng.
+
+**Admin quản lý:** vào `/admin/pass-slot`, thao tác giống hệt trang tin pass phòng (sửa, đánh dấu đã
+pass xong, ẩn, xóa).
+
+### Ghi chú kỹ thuật
+
+Hai loại tin dùng chung bảng `transfer_posts`, phân biệt bằng cột `kind` (`room` hoặc `slot`). Nhờ
+vậy RLS, Realtime, Storage và phần lớn giao diện dùng lại được, không phải nhân đôi. Cột `price`
+mang nghĩa "số tiền người nhận trả mỗi tháng": với `room` là tiền cả phòng, với `slot` là tiền một
+chỗ.

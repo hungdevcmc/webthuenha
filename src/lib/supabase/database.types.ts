@@ -103,6 +103,14 @@ export type TransferPostRow = {
   contact_zalo: string | null;
   /** Khoảng cách tới trường theo km, null nếu chưa đo */
   distance_to_school_km: number | null;
+  /** room = pass cả phòng, slot = pass slot của bản thân trong phòng */
+  kind: "room" | "slot";
+  /** Số slot muốn pass lại, chỉ dùng khi kind = "slot" */
+  slot_count: number | null;
+  /** Phòng dành cho: male = nam, female = nữ, any = nam hoặc nữ */
+  room_gender: "male" | "female" | "any";
+  /** Số người hiện đang ở trong phòng */
+  people_in_room: number;
   /** Đã pass được phòng cho người khác chưa */
   is_transferred: boolean;
   is_published: boolean;

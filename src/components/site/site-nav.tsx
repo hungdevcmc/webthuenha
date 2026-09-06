@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Repeat2, Users } from "lucide-react";
+import { Building2, Repeat2, TicketCheck, Users } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 const tabs = [
   { href: "/", label: "Tất cả phòng", icon: Building2 },
   { href: "/o-ghep", label: "Tìm bạn ở ghép", icon: Users },
   { href: "/pass-phong", label: "Pass lại phòng", icon: Repeat2 },
+  { href: "/pass-slot", label: "Pass slot phòng", icon: TicketCheck },
 ] as const;
 
 /** Thanh tab chính của trang công khai */

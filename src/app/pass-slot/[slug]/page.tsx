@@ -8,23 +8,23 @@ import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { TransferDetail } from "@/components/transfers/transfer-detail";
 
-type Props = PageProps<"/pass-phong/[slug]">;
+type Props = PageProps<"/pass-slot/[slug]">;
 
 async function loadPost(slug: string) {
   const supabase = await createClient();
-  return fetchPublicTransferBySlug(supabase, slug, "room");
+  return fetchPublicTransferBySlug(supabase, slug, "slot");
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await loadPost(slug).catch(() => null);
-  if (!post) return { title: "Không tìm thấy tin pass phòng" };
+  if (!post) return { title: "Không tìm thấy tin pass slot" };
   const cover = transferCover(post);
-  const description = `${formatVND(post.price)}/tháng · ${depositLabel(post.deposit_months)} · hợp đồng hết hạn ${formatDate(`${post.contract_end_date}T00:00:00`)} · ${post.address}`;
+  const description = `${formatVND(post.price)}/slot/tháng · ${depositLabel(post.deposit_months)} · hợp đồng hết hạn ${formatDate(`${post.contract_end_date}T00:00:00`)} · ${post.address}`;
   return {
     title: post.title,
     description,
-    alternates: { canonical: `/pass-phong/${post.slug}` },
+    alternates: { canonical: `/pass-slot/${post.slug}` },
     openGraph: {
       title: post.title,
       description,

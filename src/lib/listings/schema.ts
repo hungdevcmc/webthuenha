@@ -31,6 +31,18 @@ const optionalSmallInt = (label: string, max: number) =>
 
 const phoneRegex = /^(\+84|0)\d{8,10}$/;
 
+/** Phòng dành cho giới tính nào */
+export const ROOMMATE_GENDERS = ["any", "male", "female"] as const;
+export type RoommateGender = (typeof ROOMMATE_GENDERS)[number];
+
+/** Khoảng cách tới trường: km, cho phép để trống hoặc không gửi lên */
+export const distanceField = z
+  .number({ error: "Khoảng cách phải là số" })
+  .min(0, "Khoảng cách không được âm")
+  .max(500, "Khoảng cách tối đa 500 km")
+  .nullable()
+  .default(null);
+
 export const listingImageSchema = z.object({
   id: z.uuid().optional(),
   storage_path: z.string().min(1).max(500),
@@ -88,6 +100,9 @@ const listingBaseSchema = z.object({
     .trim()
     .max(500, "Ghi chú ở ghép tối đa 500 ký tự")
     .transform((v) => v ?? ""),
+  roommate_slot_price: money("giá một chỗ ở ghép").default(0),
+  roommate_gender: z.enum(ROOMMATE_GENDERS, { error: "Vui lòng chọn phòng dành cho ai" }).default("any"),
+  distance_to_school_km: distanceField,
   images: z.array(listingImageSchema).max(20, "Tối đa 20 ảnh"),
 });
 
@@ -102,7 +117,50 @@ export const listingSchema = listingBaseSchema.check((ctx) => {
       message: "Nhập số người sẵn sàng ở ghép (ít nhất 1 người)",
     });
   }
+  // Tab ở ghép hiển thị giá theo chỗ nên bắt buộc phải có giá này
+  if (v.roommate_open && v.roommate_slot_price <= 0) {
+    ctx.issues.push({
+      code: "custom",
+      input: v.roommate_slot_price,
+      path: ["roommate_slot_price"],
+      message: "Nhập giá một chỗ ở ghép mỗi tháng",
+    });
+  }
 });
+
+/** Chỉ các trường liên quan tới ở ghép, dùng cho trang quản trị riêng của tab ở ghép */
+export const roommateSchema = z
+  .object({
+    roommate_open: listingBaseSchema.shape.roommate_open,
+    roommate_slot_price: listingBaseSchema.shape.roommate_slot_price,
+    roommate_gender: listingBaseSchema.shape.roommate_gender,
+    roommate_male_count: listingBaseSchema.shape.roommate_male_count,
+    roommate_female_count: listingBaseSchema.shape.roommate_female_count,
+    roommate_note: listingBaseSchema.shape.roommate_note,
+    distance_to_school_km: listingBaseSchema.shape.distance_to_school_km,
+  })
+  .check((ctx) => {
+    const v = ctx.value;
+    if (v.roommate_open && v.roommate_male_count + v.roommate_female_count === 0) {
+      ctx.issues.push({
+        code: "custom",
+        input: v.roommate_male_count,
+        path: ["roommate_male_count"],
+        message: "Nhập số người sẵn sàng ở ghép (ít nhất 1 người)",
+      });
+    }
+    if (v.roommate_open && v.roommate_slot_price <= 0) {
+      ctx.issues.push({
+        code: "custom",
+        input: v.roommate_slot_price,
+        path: ["roommate_slot_price"],
+        message: "Nhập giá một chỗ ở ghép mỗi tháng",
+      });
+    }
+  });
+
+export type RoommateFormInput = z.input<typeof roommateSchema>;
+export type RoommateFormValues = z.output<typeof roommateSchema>;
 
 /** Giá trị người dùng nhập trong form (trước khi transform) */
 export type ListingFormInput = z.input<typeof listingSchema>;

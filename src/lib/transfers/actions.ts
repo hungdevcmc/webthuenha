@@ -113,6 +113,7 @@ function postPayload(values: TransferFormValues) {
     bathrooms: values.bathrooms,
     floor: values.floor,
     total_floors: values.total_floors,
+    distance_to_school_km: values.distance_to_school_km,
     amenities: values.amenities,
     description: values.description,
     contact_name: values.contact_name,

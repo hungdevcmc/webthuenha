@@ -37,6 +37,12 @@ export type PropertyRow = {
   roommate_female_count: number;
   /** Ghi chú thêm về việc ở ghép */
   roommate_note: string;
+  /** Giá một chỗ ở ghép mỗi tháng (VND); 0 nghĩa là chưa đặt */
+  roommate_slot_price: number;
+  /** Phòng dành cho: male = nam, female = nữ, any = nam hoặc nữ */
+  roommate_gender: "male" | "female" | "any";
+  /** Khoảng cách tới trường theo km, null nếu chưa đo */
+  distance_to_school_km: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -95,6 +101,8 @@ export type TransferPostRow = {
   contact_name: string;
   contact_phone: string;
   contact_zalo: string | null;
+  /** Khoảng cách tới trường theo km, null nếu chưa đo */
+  distance_to_school_km: number | null;
   /** Đã pass được phòng cho người khác chưa */
   is_transferred: boolean;
   is_published: boolean;

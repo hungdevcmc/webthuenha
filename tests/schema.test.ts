@@ -97,6 +97,9 @@ function make(partial: Partial<ListingWithImages>): ListingWithImages {
     roommate_male_count: 0,
     roommate_female_count: 0,
     roommate_note: "",
+    roommate_slot_price: 0,
+    roommate_gender: "any" as const,
+    distance_to_school_km: null,
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
     images: [],
@@ -127,8 +130,20 @@ describe("applyFilter / sortListings", () => {
 });
 
 describe("tìm bạn ở ghép", () => {
-  const roomA = make({ roommate_open: true, roommate_male_count: 2, roommate_female_count: 1 });
-  const roomB = make({ roommate_open: true, roommate_male_count: 0, roommate_female_count: 3 });
+  const roomA = make({
+    roommate_open: true,
+    roommate_male_count: 2,
+    roommate_female_count: 1,
+    roommate_gender: "male",
+    roommate_slot_price: 2_000_000,
+  });
+  const roomB = make({
+    roommate_open: true,
+    roommate_male_count: 0,
+    roommate_female_count: 3,
+    roommate_gender: "female",
+    roommate_slot_price: 2_500_000,
+  });
   const roomC = make({ roommate_open: false, roommate_male_count: 0, roommate_female_count: 0 });
   const items = [roomA, roomB, roomC];
 
@@ -147,15 +162,28 @@ describe("tìm bạn ở ghép", () => {
     expect(roommateInfo(roomB)?.label).toBe("3 nữ");
   });
 
-  it("lọc theo giới tính người ở ghép", () => {
+  it("lọc theo phòng dành cho nam hay nữ", () => {
     const base = { status: "all", price: "all", bedrooms: "all", district: "all" } as const;
-    expect(applyFilter(items, { ...base, gender: "male" })).toHaveLength(1);
-    expect(applyFilter(items, { ...base, gender: "female" })).toHaveLength(2);
+    // roomC để "any" nên hợp với cả hai lựa chọn
+    expect(applyFilter(items, { ...base, gender: "male" }).map((r) => r.roommate_gender)).toEqual(["male", "any"]);
+    expect(applyFilter(items, { ...base, gender: "female" }).map((r) => r.roommate_gender)).toEqual(["female", "any"]);
     expect(applyFilter(items, { ...base, gender: "all" })).toHaveLength(3);
   });
 
+  it("đọc được giá một chỗ và phòng dành cho ai", () => {
+    expect(roommateInfo(roomA)?.slotPrice).toBe(2_000_000);
+    expect(roommateInfo(roomA)?.genderText).toBe("Phòng nam");
+    expect(roommateInfo(roomB)?.genderText).toBe("Phòng nữ");
+  });
+
+  it("bật ở ghép thì bắt buộc nhập giá một chỗ", () => {
+    const on = { ...valid, roommate_open: true, roommate_female_count: 1, roommate_slot_price: 0 };
+    expect(listingSchema.safeParse(on).success).toBe(false);
+    expect(listingSchema.safeParse({ ...on, roommate_slot_price: 2_000_000 }).success).toBe(true);
+  });
+
   it("bắt buộc có ít nhất một người khi bật tìm bạn ở ghép", () => {
-    const on = { ...valid, roommate_open: true, roommate_male_count: 0, roommate_female_count: 0 };
+    const on = { ...valid, roommate_open: true, roommate_male_count: 0, roommate_female_count: 0, roommate_slot_price: 2_000_000 };
     expect(listingSchema.safeParse(on).success).toBe(false);
     expect(listingSchema.safeParse({ ...on, roommate_female_count: 1 }).success).toBe(true);
   });

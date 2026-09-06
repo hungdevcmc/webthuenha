@@ -36,7 +36,16 @@ export const siteConfig = {
   roommate: {
     title: "Tìm bạn ở ghép",
     intro:
-      "Những phòng dưới đây đang cần thêm người ở ghép để chia tiền thuê. Mỗi tin ghi rõ hiện có mấy bạn nam, mấy bạn nữ để bạn dễ chọn phòng phù hợp.",
+      "Những phòng dưới đây đang cần thêm người ở ghép để chia tiền thuê. Mỗi tin ghi rõ giá một chỗ mỗi tháng, phòng dành cho nam hay nữ và hiện đã có mấy bạn ở cùng.",
+    /** Chữ trên nút đăng ký ở ghép (bấm vào mở Zalo của chủ nhà) */
+    signUpLabel: "Đăng ký ở ghép",
+  },
+  /** Trường học dùng làm mốc đo khoảng cách của mỗi phòng */
+  school: {
+    /** Tên đầy đủ, hiện trong nhãn và form */
+    name: "Đại học VinUni",
+    /** Tên ngắn, hiện trên thẻ phòng cho gọn */
+    shortName: "VinUni",
   },
   /** Nội dung tab "Pass lại phòng" (tin do khách tự đăng) */
   transfer: {

@@ -29,6 +29,17 @@ export function formatUnitPrice(price: number, unit: string): string {
   return `${formatVND(price)}/${unit}`;
 }
 
+/** Khoảng cách: 0.8 -> "800 m", 1.5 -> "1,5 km". Trả về null nếu chưa có số liệu */
+export function formatDistance(km: number | null | undefined): string | null {
+  if (km === null || km === undefined || Number.isNaN(km)) return null;
+  if (km < 1) {
+    const met = Math.round(km * 1000);
+    return met <= 0 ? "Ngay tại trường" : `${met} m`;
+  }
+  const text = Number.isInteger(km) ? km.toString() : km.toFixed(1).replace(".", ",");
+  return `${text} km`;
+}
+
 /** Diện tích: "25 m²" */
 export function formatArea(m2: number): string {
   const text = Number.isInteger(m2) ? m2.toString() : m2.toFixed(1).replace(".", ",");

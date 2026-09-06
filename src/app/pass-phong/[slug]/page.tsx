@@ -11,6 +11,7 @@ import {
   Droplets,
   Layers,
   MapPin,
+  Navigation,
   Phone,
   ReceiptText,
   Ruler,
@@ -22,11 +23,12 @@ import { siteConfig } from "@/config/site";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublicTransferBySlug } from "@/lib/transfers/queries";
 import { contractRemainingLabel, depositLabel, transferCover } from "@/lib/transfers/types";
-import { formatArea, formatDate, formatDateTime, formatPhone, formatUnitPrice, formatVND } from "@/lib/format";
+import { formatArea, formatDate, formatDateTime, formatDistance, formatPhone, formatUnitPrice, formatVND } from "@/lib/format";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { ImageGallery } from "@/components/listings/image-gallery";
 import { ContactButtons, MobileContactBar } from "@/components/listings/contact-bar";
+import { DistanceBadge } from "@/components/listings/distance-badge";
 import { ContractBadge, DepositBadge, TransferStatusBadge } from "@/components/transfers/transfer-badges";
 import { TransferRealtimeRefresh } from "@/components/transfers/transfer-realtime-refresh";
 
@@ -77,6 +79,11 @@ export default async function TransferDetailPage({ params }: Props) {
       value: post.floor !== null ? `Tầng ${post.floor}${post.total_floors ? ` / ${post.total_floors}` : ""}` : "—",
     },
     { icon: Building2, label: "Tổng số tầng", value: post.total_floors !== null ? `${post.total_floors} tầng` : "—" },
+    {
+      icon: Navigation,
+      label: `Cách ${siteConfig.school.shortName}`,
+      value: formatDistance(post.distance_to_school_km) ?? "—",
+    },
   ];
 
   const costs = [
@@ -233,6 +240,7 @@ export default async function TransferDetailPage({ params }: Props) {
               <div className="mt-3 flex flex-wrap gap-1.5">
                 <ContractBadge date={post.contract_end_date} now={now} withDate={false} />
                 <DepositBadge months={post.deposit_months} />
+                <DistanceBadge km={post.distance_to_school_km} />
               </div>
               <dl className="mt-3 space-y-2 text-sm">
                 <div className="flex items-center gap-2">

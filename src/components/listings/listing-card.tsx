@@ -1,18 +1,32 @@
-import { SafeImage } from "./safe-image";
 import Link from "next/link";
 import { BedDouble, Bath, ImageOff, MapPin, Ruler } from "lucide-react";
 import { formatArea, formatRelative, formatVND } from "@/lib/format";
 import { coverImage, roommateInfo, type ListingWithImages } from "@/lib/listings/types";
 import { cn } from "@/lib/cn";
+import { SafeImage } from "./safe-image";
 import { StatusBadge } from "./status-badge";
-import { RoommateBadge } from "./roommate-badge";
+import { GenderBadge, RoommateBadge } from "./roommate-badge";
+import { DistanceBadge } from "./distance-badge";
+import { RoommateSignUpButton } from "./roommate-signup-button";
 
-type Props = { listing: ListingWithImages; now: number; priority?: boolean };
+type Props = {
+  listing: ListingWithImages;
+  now: number;
+  priority?: boolean;
+  /** "roommate" hiển thị giá một chỗ ở ghép thay cho giá cả phòng */
+  variant?: "all" | "roommate";
+};
 
-export function ListingCard({ listing, now, priority }: Props) {
+export function ListingCard({ listing, now, priority, variant = "all" }: Props) {
   const cover = coverImage(listing);
   const rented = !listing.is_available;
   const roommate = roommateInfo(listing);
+
+  // Ở tab ghép, giá hiển thị là giá một chỗ mỗi tháng. Chưa đặt giá thì
+  // vẫn hiện giá cả phòng để tin không bị trống thông tin.
+  const showSlotPrice = variant === "roommate" && roommate !== null && roommate.slotPrice > 0;
+  const price = showSlotPrice ? roommate.slotPrice : listing.price;
+  const priceSuffix = showSlotPrice ? "/chỗ/tháng" : "/tháng";
 
   return (
     <article
@@ -55,11 +69,14 @@ export function ListingCard({ listing, now, priority }: Props) {
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <p className={cn("text-xl font-bold tracking-tight", rented ? "text-stone-500" : "text-accent-600")}>
-            {formatVND(listing.price)}
-            <span className="text-sm font-medium text-muted">/tháng</span>
+            {formatVND(price)}
+            <span className="text-sm font-medium text-muted">{priceSuffix}</span>
           </p>
           <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-snug text-ink">
-            <Link href={`/phong/${listing.slug}`} className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none">
+            <Link
+              href={`/phong/${listing.slug}`}
+              className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+            >
               {listing.title}
             </Link>
           </h3>
@@ -70,7 +87,11 @@ export function ListingCard({ listing, now, priority }: Props) {
           <span className="line-clamp-2">{listing.address}</span>
         </p>
 
-        {roommate ? <RoommateBadge info={roommate} className="self-start" /> : null}
+        <div className="flex flex-wrap gap-1.5">
+          <DistanceBadge km={listing.distance_to_school_km} />
+          {roommate ? <GenderBadge info={roommate} /> : null}
+          {roommate ? <RoommateBadge info={roommate} /> : null}
+        </div>
 
         <ul className="mt-auto flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink" aria-label="Thông số chính">
           <li className="flex items-center gap-1.5">
@@ -86,6 +107,10 @@ export function ListingCard({ listing, now, priority }: Props) {
             {listing.bathrooms} vệ sinh
           </li>
         </ul>
+
+        {variant === "roommate" && roommate && !rented ? (
+          <RoommateSignUpButton listingTitle={listing.title} className="w-full" />
+        ) : null}
 
         <p className="text-xs text-stone-400">Cập nhật {formatRelative(listing.updated_at, now)}</p>
       </div>

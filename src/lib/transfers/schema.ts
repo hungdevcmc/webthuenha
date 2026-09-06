@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { listingImageSchema } from "@/lib/listings/schema";
+import { distanceField, listingImageSchema } from "@/lib/listings/schema";
 
 const requiredText = (label: string, max = 200) =>
   z
@@ -84,6 +84,7 @@ const transferBaseSchema = z.object({
   bathrooms: smallInt("số nhà vệ sinh", 20),
   floor: optionalSmallInt("tầng", 200),
   total_floors: optionalSmallInt("tổng số tầng", 200),
+  distance_to_school_km: distanceField,
   amenities: z.array(z.string().trim().min(1).max(60)).max(50, "Tối đa 50 tiện nghi"),
   description: z
     .string({ error: "Vui lòng nhập mô tả" })

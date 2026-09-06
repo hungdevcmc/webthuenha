@@ -11,6 +11,7 @@ import {
   Droplets,
   Layers,
   MapPin,
+  Navigation,
   Phone,
   ReceiptText,
   Ruler,
@@ -23,13 +24,15 @@ import { siteConfig } from "@/config/site";
 import { createClient } from "@/lib/supabase/server";
 import { fetchPublicListingBySlug } from "@/lib/listings/queries";
 import { coverImage, roommateInfo } from "@/lib/listings/types";
-import { formatArea, formatDateTime, formatPhone, formatUnitPrice, formatVND } from "@/lib/format";
+import { formatArea, formatDateTime, formatDistance, formatPhone, formatUnitPrice, formatVND } from "@/lib/format";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { ImageGallery } from "@/components/listings/image-gallery";
 import { StatusBadge } from "@/components/listings/status-badge";
 import { ContactButtons, MobileContactBar } from "@/components/listings/contact-bar";
 import { ListingRealtimeRefresh } from "@/components/listings/listing-realtime-refresh";
+import { DistanceBadge } from "@/components/listings/distance-badge";
+import { RoommateSignUpButton } from "@/components/listings/roommate-signup-button";
 
 type Props = PageProps<"/phong/[slug]">;
 
@@ -76,6 +79,11 @@ export default async function ListingDetailPage({ params }: Props) {
       value: listing.floor !== null ? `Tầng ${listing.floor}${listing.total_floors ? ` / ${listing.total_floors}` : ""}` : "—",
     },
     { icon: Building2, label: "Tổng số tầng", value: listing.total_floors !== null ? `${listing.total_floors} tầng` : "—" },
+    {
+      icon: Navigation,
+      label: `Cách ${siteConfig.school.shortName}`,
+      value: formatDistance(listing.distance_to_school_km) ?? "—",
+    },
   ];
 
   const costs = [
@@ -114,6 +122,11 @@ export default async function ListingDetailPage({ params }: Props) {
                 <MapPin className="mt-1 size-4 shrink-0 text-brand-600" aria-hidden="true" />
                 <span>{listing.address}</span>
               </p>
+              {formatDistance(listing.distance_to_school_km) ? (
+                <div className="mt-2">
+                  <DistanceBadge km={listing.distance_to_school_km} full />
+                </div>
+              ) : null}
               <p className="mt-4 text-3xl font-bold tracking-tight text-accent-600">
                 {formatVND(listing.price)}
                 <span className="text-base font-medium text-muted">/tháng</span>
@@ -189,6 +202,25 @@ export default async function ListingDetailPage({ params }: Props) {
                   Hiện có <strong className="font-semibold">{roommate.total} người</strong> sẵn sàng ở ghép tại phòng này
                   {roommate.total > 0 ? <> ({roommate.label})</> : null}.
                 </p>
+                <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-white p-4 ring-1 ring-inset ring-sky-100">
+                    <dt className="text-xs font-medium text-muted">Giá một chỗ ở ghép</dt>
+                    <dd className="mt-0.5 text-2xl font-bold text-accent-600">
+                      {roommate.slotPrice > 0 ? (
+                        <>
+                          {formatVND(roommate.slotPrice)}
+                          <span className="text-sm font-medium text-muted">/tháng</span>
+                        </>
+                      ) : (
+                        <span className="text-lg text-ink">Liên hệ để biết giá</span>
+                      )}
+                    </dd>
+                  </div>
+                  <div className="rounded-xl bg-white p-4 ring-1 ring-inset ring-sky-100">
+                    <dt className="text-xs font-medium text-muted">Phòng dành cho</dt>
+                    <dd className="mt-0.5 text-2xl font-bold text-ink">{roommate.genderText}</dd>
+                  </div>
+                </dl>
                 <dl className="mt-3 grid grid-cols-2 gap-3 sm:max-w-sm">
                   <div className="rounded-xl bg-white p-3 text-center ring-1 ring-inset ring-sky-100">
                     <dt className="text-xs font-medium text-muted">Bạn nam</dt>
@@ -201,6 +233,14 @@ export default async function ListingDetailPage({ params }: Props) {
                 </dl>
                 {roommate.note ? (
                   <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink">{roommate.note}</p>
+                ) : null}
+                {!rented ? (
+                  <div className="mt-4">
+                    <RoommateSignUpButton listingTitle={listing.title} size="lg" className="w-full sm:w-auto" />
+                    <p className="mt-2 text-xs text-muted">
+                      Bấm để nhắn Zalo cho {siteConfig.contact.name} và giữ chỗ ở ghép.
+                    </p>
+                  </div>
                 ) : null}
               </section>
             ) : null}

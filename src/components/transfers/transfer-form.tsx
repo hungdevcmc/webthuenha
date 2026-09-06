@@ -72,6 +72,7 @@ function defaultValues(props: Props): TransferAdminFormInput {
       bathrooms: p.bathrooms,
       floor: p.floor,
       total_floors: p.total_floors,
+      distance_to_school_km: p.distance_to_school_km === null ? null : Number(p.distance_to_school_km),
       amenities: p.amenities,
       description: p.description,
       contact_name: p.contact_name,
@@ -108,6 +109,7 @@ function defaultValues(props: Props): TransferAdminFormInput {
     bathrooms: 1,
     floor: null,
     total_floors: null,
+    distance_to_school_km: null,
     amenities: [],
     description: "",
     contact_name: "",
@@ -409,6 +411,23 @@ export function TransferForm(props: Props) {
             min={0}
             {...numberField("total_floors", true)}
             invalid={!!errors.total_floors}
+          />
+        </Field>
+        <Field
+          label={`Khoảng cách tới ${siteConfig.school.name} (km)`}
+          id="distance_to_school_km"
+          error={err("distance_to_school_km")}
+          hint="bỏ trống nếu chưa đo"
+        >
+          <Input
+            id="distance_to_school_km"
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step={0.1}
+            {...numberField("distance_to_school_km", true)}
+            invalid={!!errors.distance_to_school_km}
+            placeholder="1.5"
           />
         </Field>
       </Section>

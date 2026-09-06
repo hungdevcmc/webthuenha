@@ -29,6 +29,8 @@ Mọi nội dung thương hiệu nằm trong **một file duy nhất**: [`src/co
 | Tỉnh/thành mặc định khi tạo tin | `defaultCity` |
 | Danh sách tiện nghi gợi ý trong form | `amenitySuggestions` |
 | Tiêu đề và lời giới thiệu tab Tìm bạn ở ghép | `roommate.title`, `roommate.intro` |
+| Chữ trên nút đăng ký ở ghép | `roommate.signUpLabel` |
+| Tên trường dùng làm mốc đo khoảng cách | `school.name`, `school.shortName` |
 | Tiêu đề và lời giới thiệu tab Pass lại phòng | `transfer.title`, `transfer.intro` |
 
 Sửa xong thì lưu file, chạy lại (`npm run dev`) hoặc đẩy lên Git để Vercel tự triển khai.
@@ -138,6 +140,7 @@ src/
   app/
     page.tsx                              Trang chủ (danh sách phòng)
     o-ghep/page.tsx                       Tab "Tìm bạn ở ghép"
+    admin/(dashboard)/o-ghep/             Quản trị riêng phần ở ghép
     pass-phong/page.tsx                   Tab "Pass lại phòng"
     pass-phong/dang-tin/page.tsx          Form khách tự đăng tin pass phòng
     pass-phong/[slug]/page.tsx            Chi tiết một tin pass phòng
@@ -171,9 +174,9 @@ tests/          Kiểm thử đơn vị (Vitest)
 
 | Bảng | Nội dung |
 | --- | --- |
-| `properties` | Tin đăng: tiêu đề, địa chỉ, giá, cọc, điện, nước, phí dịch vụ, diện tích, số phòng, tầng, tiện nghi, mô tả, liên hệ, `is_available`, `is_published`, `slug` duy nhất, `created_at`, `updated_at`, và nhóm ở ghép `roommate_open`, `roommate_male_count`, `roommate_female_count`, `roommate_note` |
+| `properties` | Tin đăng: tiêu đề, địa chỉ, giá, cọc, điện, nước, phí dịch vụ, diện tích, số phòng, tầng, tiện nghi, mô tả, liên hệ, `is_available`, `is_published`, `slug` duy nhất, `created_at`, `updated_at`, `distance_to_school_km` (khoảng cách tới trường), và nhóm ở ghép `roommate_open`, `roommate_slot_price` (giá một chỗ/tháng), `roommate_gender` (phòng nam/nữ/cả hai), `roommate_male_count`, `roommate_female_count`, `roommate_note` |
 | `property_images` | Ảnh của tin: `storage_path`, `url`, `sort_order`, `is_cover`. Xóa tin thì ảnh xóa theo |
-| `transfer_posts` | Tin pass phòng do **khách tự đăng**: đủ thông tin phòng như trên, cộng thêm `contract_end_date` (ngày hết hạn hợp đồng), `deposit_months` (cọc 1 hay cọc 3 tháng), `is_transferred` (đã pass xong chưa), `is_published` |
+| `transfer_posts` | Tin pass phòng do **khách tự đăng**: đủ thông tin phòng như trên, cộng thêm `contract_end_date` (ngày hết hạn hợp đồng), `deposit_months` (cọc 1 hay cọc 3 tháng), `distance_to_school_km`, `is_transferred` (đã pass xong chưa), `is_published` |
 | `transfer_post_images` | Ảnh của tin pass phòng. Xóa tin thì ảnh xóa theo |
 | `admin_users` | Danh sách user được quyền quản trị, liên kết `auth.users` |
 
@@ -211,19 +214,30 @@ Trigger trong database gọi `realtime.send()` trên kênh công khai `listings`
 
 ## 11. Tab "Tìm bạn ở ghép"
 
-Tab này ở địa chỉ `/o-ghep`, chỉ hiện những tin được bật chế độ tìm bạn ở ghép.
+Tab này ở địa chỉ `/o-ghep`, chỉ hiện những phòng được bật chế độ tìm bạn ở ghép.
+Khác với tab "Tất cả phòng", ở đây giá hiển thị là **giá một chỗ mỗi tháng**, không phải giá cả phòng.
 
-**Cách bật cho một phòng:** vào trang quản trị, mở tin cần sửa, kéo tới mục **Tìm bạn ở ghép**, tích ô "Phòng này đang tìm bạn ở ghép", nhập số bạn nam và số bạn nữ hiện sẵn sàng ở ghép, rồi lưu. Muốn gỡ khỏi tab thì bỏ tích ô đó.
+Mỗi thẻ phòng còn cho biết **phòng dành cho nam hay nữ**, **khoảng cách tới trường**, số bạn đang ở,
+và có nút **Đăng ký ở ghép** mở thẳng Zalo của bạn. Nút này xuất hiện cả ngoài danh sách lẫn trong
+trang chi tiết. Số Zalo lấy từ `contact.phoneRaw` trong `src/config/site.ts`.
 
-Ô ghi chú không bắt buộc, dùng để nêu yêu cầu thêm (giờ giấc, thói quen sinh hoạt...). Nội dung này hiện ở trang chi tiết phòng.
+### Quản lý ở ghép
 
-Khách xem sẽ thấy:
+Vào **`/admin/o-ghep`** (nút "Tìm bạn ở ghép" trên thanh quản trị). Đây là tab riêng chỉ để chỉnh
+phần ở ghép, không đụng tới giá phòng, ảnh hay mô tả.
 
-- Nhãn "Ở ghép: 2 nam · 1 nữ" trên card phòng, ở cả trang chủ lẫn tab ở ghép.
-- Bộ lọc thêm ô "Bạn ở ghép" để chọn phòng đang có bạn nam hoặc bạn nữ.
-- Trang chi tiết có riêng một khối ghi rõ tổng số người và số lượng theo giới tính.
+| Trường | Ý nghĩa |
+| --- | --- |
+| Phòng này đang tìm bạn ở ghép | Bật thì tin mới hiện ở tab `/o-ghep` |
+| Giá một chỗ ở ghép / tháng | Số tiền hiện trên thẻ phòng ở tab ghép, thay cho giá cả phòng |
+| Phòng dành cho | Phòng nam, Phòng nữ, hoặc Nam hoặc nữ |
+| Số bạn nam / nữ đang ở | Hiện trên nhãn "Ở ghép: …" |
+| Khoảng cách tới trường (km) | Dùng chung, hiện ở cả ba tab |
+| Ghi chú | Thói quen, giờ giấc, yêu cầu riêng |
 
-Số người phải từ 1 trở lên khi đã bật chế độ ở ghép; hệ thống sẽ báo lỗi nếu để cả hai ô bằng 0.
+Danh sách có bộ lọc nhanh **Đang tìm ghép / Chưa bật / Thiếu giá chỗ**, nút bật tắt nhanh, và cảnh
+báo đỏ với phòng đã bật ghép nhưng chưa nhập giá một chỗ. Phòng chưa có giá chỗ vẫn hiện ở tab ghép
+nhưng lấy tạm giá cả phòng, nên nhập giá chỗ sớm để khách không hiểu nhầm.
 
 ## 12. Tab "Pass lại phòng"
 
@@ -247,3 +261,12 @@ Vì ai cũng đăng được tin nên form có ba lớp chặn cơ bản: một 
 nhanh dưới 3 giây, và toàn bộ dữ liệu được kiểm tra hai lần (trình duyệt và server) cộng với ràng buộc
 ngay trong database. Đây là mức đủ cho quy mô nhỏ; nếu sau này bị spam nhiều, bước tiếp theo nên làm
 là bắt tin chờ admin duyệt trước khi hiển thị.
+
+## 13. Khoảng cách tới trường
+
+Mỗi phòng và mỗi tin pass phòng có một ô **Khoảng cách tới trường (km)**, nhập số thập phân được
+(ví dụ `1.2`). Để trống nếu chưa đo. Giao diện tự đổi cách hiển thị: dưới 1 km ghi theo mét
+("800 m"), từ 1 km trở lên ghi theo km ("1,2 km"). Nhãn này hiện trên thẻ phòng ở cả ba tab và
+trong bảng thông số ở trang chi tiết.
+
+Đổi tên trường ở `school.name` và `school.shortName` trong `src/config/site.ts`.

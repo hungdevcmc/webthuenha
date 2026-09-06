@@ -79,12 +79,12 @@ export function ListingFilters({ filter, districts, onChange, resultCount, showG
         {showGender ? (
           <div>
             <label htmlFor="f-gender" className="mb-1 block text-xs font-medium text-muted">
-              Bạn ở ghép
+              Phòng dành cho
             </label>
             <Select id="f-gender" value={filter.gender} onChange={(e) => set("gender", e.target.value as ListingFilter["gender"])}>
-              <option value="all">Nam hoặc nữ</option>
-              <option value="male">Có bạn nam</option>
-              <option value="female">Có bạn nữ</option>
+              <option value="all">Tất cả</option>
+              <option value="male">Phòng nam</option>
+              <option value="female">Phòng nữ</option>
             </Select>
           </div>
         ) : null}

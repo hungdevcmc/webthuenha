@@ -24,6 +24,13 @@ export const DEFAULT_FILTER: ListingFilter = {
   gender: "all",
 };
 
+/** Nhãn tiếng Việt cho việc phòng dành cho ai */
+export function genderLabel(gender: Listing["roommate_gender"]): string {
+  if (gender === "male") return "Phòng nam";
+  if (gender === "female") return "Phòng nữ";
+  return "Nam hoặc nữ";
+}
+
 /** Thông tin ở ghép của một tin, null nếu tin không bật tìm bạn ở ghép */
 export type RoommateInfo = {
   male: number;
@@ -32,6 +39,11 @@ export type RoommateInfo = {
   /** Ví dụ: "2 nam · 1 nữ" */
   label: string;
   note: string;
+  /** Giá một chỗ ở ghép mỗi tháng; 0 nghĩa là chưa đặt */
+  slotPrice: number;
+  gender: Listing["roommate_gender"];
+  /** Ví dụ: "Phòng nữ" */
+  genderText: string;
 };
 
 export function roommateInfo(listing: Listing): RoommateInfo | null {
@@ -47,6 +59,9 @@ export function roommateInfo(listing: Listing): RoommateInfo | null {
     total: male + female,
     label: parts.length > 0 ? parts.join(" · ") : "Chưa có ai đăng ký",
     note: listing.roommate_note ?? "",
+    slotPrice: Math.max(0, listing.roommate_slot_price ?? 0),
+    gender: listing.roommate_gender ?? "any",
+    genderText: genderLabel(listing.roommate_gender ?? "any"),
   };
 }
 
@@ -88,8 +103,9 @@ export function applyFilter(listings: ListingWithImages[], f: ListingFilter): Li
     if (f.status === "available" && !l.is_available) return false;
     if (f.status === "rented" && l.is_available) return false;
     if (f.district !== "all" && l.district !== f.district) return false;
-    if (f.gender === "male" && l.roommate_male_count < 1) return false;
-    if (f.gender === "female" && l.roommate_female_count < 1) return false;
+    // Ở tab ghép: lọc theo phòng dành cho nam/nữ, phòng "nam hoặc nữ" luôn hợp lệ
+    if (f.gender === "male" && l.roommate_gender === "female") return false;
+    if (f.gender === "female" && l.roommate_gender === "male") return false;
     if (f.bedrooms === "1" && l.bedrooms !== 1) return false;
     if (f.bedrooms === "2" && l.bedrooms !== 2) return false;
     if (f.bedrooms === "3plus" && l.bedrooms < 3) return false;

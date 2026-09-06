@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { randomSuffix, slugify } from "@/lib/slug";
-import { listingSchema, type ListingFormValues } from "./schema";
+import { listingSchema, roommateSchema, type ListingFormValues, type RoommateFormValues } from "./schema";
 import { IMAGE_BUCKET } from "./types";
 
 export type ActionResult<T = undefined> =
@@ -28,6 +28,7 @@ async function requireAdmin() {
 
 function revalidateListingPaths(slug?: string) {
   revalidatePath("/");
+  revalidatePath("/o-ghep");
   revalidatePath("/admin");
   revalidatePath("/sitemap.xml");
   if (slug) revalidatePath(`/phong/${slug}`);
@@ -254,6 +255,44 @@ export async function deleteStorageObjects(paths: string[]): Promise<ActionResul
   try {
     const supabase = await requireAdmin();
     await removeUnreferencedObjects(supabase, paths);
+    return { ok: true, data: undefined };
+  } catch (err) {
+    return toResult(err);
+  }
+}
+
+/**
+ * Cập nhật riêng phần thông tin ở ghép của một phòng.
+ * Dùng cho tab quản trị "Tìm bạn ở ghép" nên không đụng tới giá phòng, ảnh hay mô tả.
+ */
+export async function updateRoommateInfo(id: string, input: unknown): Promise<ActionResult> {
+  try {
+    const supabase = await requireAdmin();
+    const parsed = roommateSchema.safeParse(input);
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      throw new ActionError(`Dữ liệu không hợp lệ: ${first?.message ?? "vui lòng kiểm tra lại"}`);
+    }
+    const values: RoommateFormValues = parsed.data;
+    const { data, error } = await supabase
+      .from("properties")
+      .update({
+        roommate_open: values.roommate_open,
+        roommate_slot_price: values.roommate_slot_price,
+        roommate_gender: values.roommate_gender,
+        roommate_male_count: values.roommate_male_count,
+        roommate_female_count: values.roommate_female_count,
+        roommate_note: values.roommate_note,
+        distance_to_school_km: values.distance_to_school_km,
+      })
+      .eq("id", id)
+      .select("slug")
+      .maybeSingle();
+    if (error) throw new ActionError(error.message);
+    if (!data) throw new ActionError("Không tìm thấy tin cần sửa.");
+    revalidatePath("/o-ghep");
+    revalidatePath("/admin/o-ghep");
+    revalidateListingPaths(data.slug);
     return { ok: true, data: undefined };
   } catch (err) {
     return toResult(err);

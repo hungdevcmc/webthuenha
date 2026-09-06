@@ -41,6 +41,7 @@ function makePost(over: Partial<TransferWithImages> = {}): TransferWithImages {
     bathrooms: 1,
     floor: null,
     total_floors: null,
+    distance_to_school_km: null,
     amenities: [],
     description: "Phòng sạch, đầy đủ nội thất, cần pass lại vì chuyển công tác.",
     contact_name: "Chị Lan",
@@ -145,6 +146,17 @@ describe("kiểm tra dữ liệu form đăng tin", () => {
 
   it("nhận dữ liệu hợp lệ", () => {
     expect(transferPostSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("không gửi khoảng cách tới trường thì hiểu là chưa đo", () => {
+    const parsed = transferPostSchema.parse(valid);
+    expect(parsed.distance_to_school_km).toBeNull();
+  });
+
+  it("từ chối khoảng cách âm hoặc quá xa", () => {
+    expect(transferPostSchema.safeParse({ ...valid, distance_to_school_km: -1 }).success).toBe(false);
+    expect(transferPostSchema.safeParse({ ...valid, distance_to_school_km: 900 }).success).toBe(false);
+    expect(transferPostSchema.safeParse({ ...valid, distance_to_school_km: 1.5 }).success).toBe(true);
   });
 
   it("bắt buộc chọn cọc 1 hoặc cọc 3 tháng", () => {

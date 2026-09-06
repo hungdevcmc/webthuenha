@@ -10,6 +10,7 @@ import { siteConfig } from "@/config/site";
 import { createListing, updateListing } from "@/lib/listings/actions";
 import {
   ELECTRICITY_UNITS,
+  ROOMMATE_GENDERS,
   WATER_UNITS,
   listingSchema,
   type ListingFormInput,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/listings/schema";
 import type { ListingWithImages } from "@/lib/listings/types";
 import { formatVND } from "@/lib/format";
+import { genderLabel } from "@/lib/listings/types";
 import { useUnsavedChangesWarning } from "@/hooks/use-unsaved-changes";
 import { Button } from "@/components/ui/button";
 import { Checkbox, FieldError, Input, Label, Select, Textarea } from "@/components/ui/form-fields";
@@ -57,6 +59,9 @@ function defaultValues(props: Props): ListingFormInput {
       roommate_male_count: l.roommate_male_count,
       roommate_female_count: l.roommate_female_count,
       roommate_note: l.roommate_note,
+      roommate_slot_price: l.roommate_slot_price,
+      roommate_gender: l.roommate_gender,
+      distance_to_school_km: l.distance_to_school_km === null ? null : Number(l.distance_to_school_km),
       images: l.images.map((img) => ({
         id: img.id,
         storage_path: img.storage_path,
@@ -95,6 +100,9 @@ function defaultValues(props: Props): ListingFormInput {
     roommate_male_count: 0,
     roommate_female_count: 0,
     roommate_note: "",
+    roommate_slot_price: 0,
+    roommate_gender: "any",
+    distance_to_school_km: null,
     images: [],
   };
 }
@@ -236,6 +244,23 @@ export function ListingForm(props: Props) {
         <Field label="Tổng số tầng của tòa nhà" id="total_floors" error={err("total_floors")}>
           <Input id="total_floors" type="number" inputMode="numeric" min={0} {...numberField("total_floors", true)} invalid={!!errors.total_floors} />
         </Field>
+        <Field
+          label={`Khoảng cách tới ${siteConfig.school.name} (km)`}
+          id="distance_to_school_km"
+          error={err("distance_to_school_km")}
+          hint="bỏ trống nếu chưa đo"
+        >
+          <Input
+            id="distance_to_school_km"
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step={0.1}
+            {...numberField("distance_to_school_km", true)}
+            invalid={!!errors.distance_to_school_km}
+            placeholder="1.5"
+          />
+        </Field>
       </Section>
 
       <Section title="Nội thất và tiện nghi" single>
@@ -287,6 +312,33 @@ export function ListingForm(props: Props) {
             {...register("roommate_open")}
           />
         </div>
+        <Field
+          label="Giá một chỗ ở ghép / tháng"
+          id="roommate_slot_price"
+          error={err("roommate_slot_price")}
+          hint="giá hiện ở tab Tìm bạn ở ghép"
+        >
+          <Input
+            id="roommate_slot_price"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={100000}
+            {...numberField("roommate_slot_price")}
+            invalid={!!errors.roommate_slot_price}
+            disabled={!roommateOpen}
+            placeholder="2500000"
+          />
+        </Field>
+        <Field label="Phòng dành cho" id="roommate_gender" error={err("roommate_gender")}>
+          <Select id="roommate_gender" {...register("roommate_gender")} invalid={!!errors.roommate_gender} disabled={!roommateOpen}>
+            {ROOMMATE_GENDERS.map((g) => (
+              <option key={g} value={g}>
+                {genderLabel(g)}
+              </option>
+            ))}
+          </Select>
+        </Field>
         <Field label="Số bạn nam sẵn sàng ở ghép" id="roommate_male_count" error={err("roommate_male_count")}>
           <Input
             id="roommate_male_count"

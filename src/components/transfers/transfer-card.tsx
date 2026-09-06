@@ -4,6 +4,7 @@ import { SafeImage } from "@/components/listings/safe-image";
 import { formatArea, formatRelative, formatVND } from "@/lib/format";
 import { transferCover, type TransferWithImages } from "@/lib/transfers/types";
 import { cn } from "@/lib/cn";
+import { DistanceBadge } from "@/components/listings/distance-badge";
 import { ContractBadge, DepositBadge, TransferStatusBadge } from "./transfer-badges";
 
 type Props = { post: TransferWithImages; now: number; priority?: boolean };
@@ -74,6 +75,7 @@ export function TransferCard({ post, now, priority }: Props) {
         <div className="flex flex-wrap gap-1.5">
           <ContractBadge date={post.contract_end_date} now={now} withDate={false} />
           <DepositBadge months={post.deposit_months} />
+          <DistanceBadge km={post.distance_to_school_km} />
         </div>
 
         <ul className="mt-auto flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink" aria-label="Thông số chính">

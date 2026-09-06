@@ -124,7 +124,7 @@ export function ListingGrid({ initialListings, initialError = null, variant = "a
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy={refreshing}>
           {visible.map((listing, index) => (
-            <ListingCard key={listing.id} listing={listing} now={now} priority={index < 3} />
+            <ListingCard key={listing.id} listing={listing} now={now} priority={index < 3} variant={variant} />
           ))}
         </div>
       )}

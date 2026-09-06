@@ -182,9 +182,9 @@ describe("tìm bạn ở ghép", () => {
     expect(listingSchema.safeParse({ ...on, roommate_slot_price: 2_000_000 }).success).toBe(true);
   });
 
-  it("bắt buộc có ít nhất một người khi bật tìm bạn ở ghép", () => {
+  it("cho phép để 0 người đang ở khi bật tìm bạn ở ghép", () => {
     const on = { ...valid, roommate_open: true, roommate_male_count: 0, roommate_female_count: 0, roommate_slot_price: 2_000_000 };
-    expect(listingSchema.safeParse(on).success).toBe(false);
+    expect(listingSchema.safeParse(on).success).toBe(true);
     expect(listingSchema.safeParse({ ...on, roommate_female_count: 1 }).success).toBe(true);
   });
 });

@@ -108,15 +108,7 @@ const listingBaseSchema = z.object({
 
 export const listingSchema = listingBaseSchema.check((ctx) => {
   const v = ctx.value;
-  // Đã bật tìm bạn ở ghép thì phải có ít nhất một người
-  if (v.roommate_open && v.roommate_male_count + v.roommate_female_count === 0) {
-    ctx.issues.push({
-      code: "custom",
-      input: v.roommate_male_count,
-      path: ["roommate_male_count"],
-      message: "Nhập số người sẵn sàng ở ghép (ít nhất 1 người)",
-    });
-  }
+  // Số người đang ở có thể bằng 0: phòng trống hoàn toàn vẫn cần tìm người ghép.
   // Tab ở ghép hiển thị giá theo chỗ nên bắt buộc phải có giá này
   if (v.roommate_open && v.roommate_slot_price <= 0) {
     ctx.issues.push({
@@ -141,14 +133,7 @@ export const roommateSchema = z
   })
   .check((ctx) => {
     const v = ctx.value;
-    if (v.roommate_open && v.roommate_male_count + v.roommate_female_count === 0) {
-      ctx.issues.push({
-        code: "custom",
-        input: v.roommate_male_count,
-        path: ["roommate_male_count"],
-        message: "Nhập số người sẵn sàng ở ghép (ít nhất 1 người)",
-      });
-    }
+    // Số người đang ở có thể bằng 0, chỉ giá một chỗ là bắt buộc
     if (v.roommate_open && v.roommate_slot_price <= 0) {
       ctx.issues.push({
         code: "custom",

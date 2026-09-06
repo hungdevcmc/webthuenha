@@ -62,9 +62,9 @@ export function AdminRoommateTable({ listings }: { listings: ListingWithImages[]
   /** Bật/tắt nhanh chế độ ở ghép, giữ nguyên các thông tin còn lại */
   function toggleOpen(l: ListingWithImages) {
     const next = !l.roommate_open;
-    // Bật lên mà chưa có giá chỗ hoặc chưa có người thì mở form để nhập cho đủ
-    if (next && (l.roommate_slot_price <= 0 || l.roommate_male_count + l.roommate_female_count === 0)) {
-      toast.info("Cần nhập giá một chỗ và số người trước khi bật.");
+    // Bật lên mà chưa có giá một chỗ thì mở form để nhập trước
+    if (next && l.roommate_slot_price <= 0) {
+      toast.info("Cần nhập giá một chỗ trước khi bật.");
       router.push(`/admin/o-ghep/${l.id}/chinh-sua`);
       return;
     }

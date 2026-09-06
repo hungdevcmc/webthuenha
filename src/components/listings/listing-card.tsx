@@ -20,13 +20,16 @@ type Props = {
 export function ListingCard({ listing, now, priority, variant = "all" }: Props) {
   const cover = coverImage(listing);
   const rented = !listing.is_available;
-  const roommate = roommateInfo(listing);
+  const roommateMode = variant === "roommate";
+  // Thông tin ở ghép chỉ xuất hiện ở tab "Tìm bạn ở ghép"
+  const roommate = roommateMode ? roommateInfo(listing) : null;
 
-  // Ở tab ghép, giá hiển thị là giá một chỗ mỗi tháng. Chưa đặt giá thì
-  // vẫn hiện giá cả phòng để tin không bị trống thông tin.
-  const showSlotPrice = variant === "roommate" && roommate !== null && roommate.slotPrice > 0;
-  const price = showSlotPrice ? roommate.slotPrice : listing.price;
-  const priceSuffix = showSlotPrice ? "/chỗ/tháng" : "/tháng";
+  // Tab ghép luôn hiển thị giá một chỗ, không bao giờ lấy giá cả phòng.
+  // Chưa đặt giá chỗ thì ghi "Liên hệ để biết giá" cho khỏi hiểu nhầm.
+  const slotPrice = roommate?.slotPrice ?? 0;
+  const showPrice = !roommateMode || slotPrice > 0;
+  const price = roommateMode ? slotPrice : listing.price;
+  const priceSuffix = roommateMode ? "/chỗ/tháng" : "/tháng";
 
   return (
     <article
@@ -69,8 +72,14 @@ export function ListingCard({ listing, now, priority, variant = "all" }: Props) 
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <p className={cn("text-xl font-bold tracking-tight", rented ? "text-stone-500" : "text-accent-600")}>
-            {formatVND(price)}
-            <span className="text-sm font-medium text-muted">{priceSuffix}</span>
+            {showPrice ? (
+              <>
+                {formatVND(price)}
+                <span className="text-sm font-medium text-muted">{priceSuffix}</span>
+              </>
+            ) : (
+              <span className="text-base font-semibold text-ink">Liên hệ để biết giá một chỗ</span>
+            )}
           </p>
           <h3 className="mt-1 line-clamp-2 text-base font-semibold leading-snug text-ink">
             <Link
@@ -108,7 +117,7 @@ export function ListingCard({ listing, now, priority, variant = "all" }: Props) 
           </li>
         </ul>
 
-        {variant === "roommate" && roommate && !rented ? (
+        {roommateMode && roommate && !rented ? (
           <RoommateSignUpButton listingTitle={listing.title} className="w-full" />
         ) : null}
 

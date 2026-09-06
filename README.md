@@ -217,7 +217,11 @@ Trigger trong database gọi `realtime.send()` trên kênh công khai `listings`
 Tab này ở địa chỉ `/o-ghep`, chỉ hiện những phòng được bật chế độ tìm bạn ở ghép.
 Khác với tab "Tất cả phòng", ở đây giá hiển thị là **giá một chỗ mỗi tháng**, không phải giá cả phòng.
 
-Mỗi thẻ phòng còn cho biết **phòng dành cho nam hay nữ**, **khoảng cách tới trường**, số bạn đang ở,
+Thẻ phòng ở tab này **chỉ hiện giá một chỗ**, không bao giờ hiện giá cả phòng. Phòng chưa nhập giá
+chỗ sẽ ghi "Liên hệ để biết giá một chỗ" thay vì lấy giá phòng làm dự phòng.
+
+Mỗi thẻ phòng còn cho biết **phòng dành cho nam hay nữ**, **khoảng cách tới trường**, nhãn
+**"Đã có: 2 nam"** cho biết ai đang ở trong phòng,
 và có nút **Đăng ký ở ghép** mở thẳng Zalo của bạn. Nút này xuất hiện cả ngoài danh sách lẫn trong
 trang chi tiết. Số Zalo lấy từ `contact.phoneRaw` trong `src/config/site.ts`.
 
@@ -236,8 +240,10 @@ phần ở ghép, không đụng tới giá phòng, ảnh hay mô tả.
 | Ghi chú | Thói quen, giờ giấc, yêu cầu riêng |
 
 Danh sách có bộ lọc nhanh **Đang tìm ghép / Chưa bật / Thiếu giá chỗ**, nút bật tắt nhanh, và cảnh
-báo đỏ với phòng đã bật ghép nhưng chưa nhập giá một chỗ. Phòng chưa có giá chỗ vẫn hiện ở tab ghép
-nhưng lấy tạm giá cả phòng, nên nhập giá chỗ sớm để khách không hiểu nhầm.
+báo đỏ với phòng đã bật ghép nhưng chưa nhập giá một chỗ.
+
+Thông tin ở ghép chỉ xuất hiện ở tab `/o-ghep`. Tab "Tất cả phòng" ở trang chủ giữ nguyên là nơi
+xem phòng cho thuê nguyên căn, không hiện nhãn ở ghép nào.
 
 ## 12. Tab "Pass lại phòng"
 

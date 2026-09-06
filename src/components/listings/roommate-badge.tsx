@@ -37,9 +37,9 @@ export function RoommateBadge({ info, className }: Props) {
     >
       <Users className="size-3.5 shrink-0" aria-hidden="true" />
       <span>
-        Ở ghép: {info.label}
+        {info.total > 0 ? `Đã có: ${info.label}` : "Chưa có ai ở"}
         <span className="sr-only">
-          {info.total > 0 ? ` – ${info.total} người sẵn sàng ở ghép` : " – chưa có ai đăng ký ở ghép"}
+          {info.total > 0 ? ` đang ở trong phòng` : " trong phòng"}
         </span>
       </span>
     </span>

@@ -38,6 +38,12 @@ export const siteConfig = {
     intro:
       "Những phòng dưới đây đang cần thêm người ở ghép để chia tiền thuê. Mỗi tin ghi rõ hiện có mấy bạn nam, mấy bạn nữ để bạn dễ chọn phòng phù hợp.",
   },
+  /** Nội dung tab "Pass lại phòng" (tin do khách tự đăng) */
+  transfer: {
+    title: "Pass lại phòng",
+    intro:
+      "Nơi người đang thuê đăng tin nhượng lại phòng của mình. Mỗi tin ghi rõ hợp đồng còn hạn tới ngày nào và người nhận phải đóng cọc mấy tháng.",
+  },
   /** Thông tin liên hệ mặc định (dùng khi tin đăng không ghi riêng) */
   contact: {
     name: "Anh Hưng (chủ nhà)",

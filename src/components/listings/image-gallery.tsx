@@ -3,10 +3,12 @@
 import { SafeImage } from "./safe-image";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ImageOff, X } from "lucide-react";
-import type { ListingImage } from "@/lib/listings/types";
 import { cn } from "@/lib/cn";
 
-type Props = { images: ListingImage[]; title: string };
+/** Chỉ cần id và url nên dùng được cho cả ảnh tin đăng lẫn ảnh tin pass phòng */
+type GalleryImage = { id: string; url: string };
+
+type Props = { images: GalleryImage[]; title: string };
 
 export function ImageGallery({ images, title }: Props) {
   const [active, setActive] = useState(0);

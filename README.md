@@ -4,7 +4,8 @@
 
 Website gồm hai khu vực tách biệt:
 
-- **Trang công khai** cho khách thuê: hai tab – `/` xem toàn bộ phòng và `/o-ghep` xem những phòng đang tìm bạn ở ghép. Lọc, xem chi tiết, gọi điện / nhắn Zalo. Không cần đăng ký hay đăng nhập.
+- **Trang công khai** cho khách thuê: ba tab – `/` xem toàn bộ phòng, `/o-ghep` xem những phòng đang tìm bạn ở ghép, `/pass-phong` xem những phòng đang cần nhượng lại. Lọc, xem chi tiết, gọi điện / nhắn Zalo. Không cần đăng ký hay đăng nhập.
+- **Khách tự đăng tin pass phòng** tại `/pass-phong/dang-tin`: không cần tài khoản, tin hiện ngay. Admin có quyền sửa, ẩn hoặc xóa các tin này.
 - **Trang quản trị** tại `/admin`: bắt buộc đăng nhập, dùng để thêm, sửa, ẩn/hiện, xóa tin và quản lý ảnh.
 
 Công nghệ: Next.js 16 (App Router, TypeScript), Tailwind CSS 4, Supabase (PostgreSQL + Auth + Storage + Realtime), triển khai trên Vercel. Toàn bộ đều dùng gói miễn phí.
@@ -28,6 +29,7 @@ Mọi nội dung thương hiệu nằm trong **một file duy nhất**: [`src/co
 | Tỉnh/thành mặc định khi tạo tin | `defaultCity` |
 | Danh sách tiện nghi gợi ý trong form | `amenitySuggestions` |
 | Tiêu đề và lời giới thiệu tab Tìm bạn ở ghép | `roommate.title`, `roommate.intro` |
+| Tiêu đề và lời giới thiệu tab Pass lại phòng | `transfer.title`, `transfer.intro` |
 
 Sửa xong thì lưu file, chạy lại (`npm run dev`) hoặc đẩy lên Git để Vercel tự triển khai.
 
@@ -136,6 +138,10 @@ src/
   app/
     page.tsx                              Trang chủ (danh sách phòng)
     o-ghep/page.tsx                       Tab "Tìm bạn ở ghép"
+    pass-phong/page.tsx                   Tab "Pass lại phòng"
+    pass-phong/dang-tin/page.tsx          Form khách tự đăng tin pass phòng
+    pass-phong/[slug]/page.tsx            Chi tiết một tin pass phòng
+    admin/(dashboard)/pass-phong/         Quản trị tin pass phòng
     phong/[slug]/page.tsx                 Trang chi tiết một phòng
     admin/login/page.tsx                  Đăng nhập quản trị
     admin/(dashboard)/page.tsx            Danh sách tin (quản trị)
@@ -167,6 +173,8 @@ tests/          Kiểm thử đơn vị (Vitest)
 | --- | --- |
 | `properties` | Tin đăng: tiêu đề, địa chỉ, giá, cọc, điện, nước, phí dịch vụ, diện tích, số phòng, tầng, tiện nghi, mô tả, liên hệ, `is_available`, `is_published`, `slug` duy nhất, `created_at`, `updated_at`, và nhóm ở ghép `roommate_open`, `roommate_male_count`, `roommate_female_count`, `roommate_note` |
 | `property_images` | Ảnh của tin: `storage_path`, `url`, `sort_order`, `is_cover`. Xóa tin thì ảnh xóa theo |
+| `transfer_posts` | Tin pass phòng do **khách tự đăng**: đủ thông tin phòng như trên, cộng thêm `contract_end_date` (ngày hết hạn hợp đồng), `deposit_months` (cọc 1 hay cọc 3 tháng), `is_transferred` (đã pass xong chưa), `is_published` |
+| `transfer_post_images` | Ảnh của tin pass phòng. Xóa tin thì ảnh xóa theo |
 | `admin_users` | Danh sách user được quyền quản trị, liên kết `auth.users` |
 
 ### Row Level Security
@@ -175,7 +183,7 @@ RLS bật trên cả ba bảng. Hàm `public.is_admin()` kiểm tra user hiện 
 
 | Đối tượng | Được làm gì |
 | --- | --- |
-| Khách chưa đăng nhập | Chỉ **đọc** tin có `is_published = true` và ảnh của những tin đó |
+| Khách chưa đăng nhập | Với `properties`: chỉ **đọc** tin có `is_published = true` và ảnh của những tin đó. Với `transfer_posts`: đọc tin công khai và **thêm** tin mới, nhưng **không** sửa, không xóa |
 | User đã đăng nhập nhưng không phải admin | Giống khách chưa đăng nhập |
 | Admin | Đọc, thêm, sửa, xóa toàn bộ tin và ảnh |
 
@@ -216,3 +224,26 @@ Khách xem sẽ thấy:
 - Trang chi tiết có riêng một khối ghi rõ tổng số người và số lượng theo giới tính.
 
 Số người phải từ 1 trở lên khi đã bật chế độ ở ghép; hệ thống sẽ báo lỗi nếu để cả hai ô bằng 0.
+
+## 12. Tab "Pass lại phòng"
+
+Tab này ở địa chỉ `/pass-phong`, dành cho người đang thuê muốn nhượng lại phòng của mình.
+
+**Khách đăng tin:** bấm nút **Đăng tin pass phòng** trên tab đó (hoặc vào thẳng `/pass-phong/dang-tin`).
+Không cần tài khoản. Ngoài thông tin phòng như tin cho thuê bình thường, form bắt buộc hai mục:
+
+- **Ngày hết hạn hợp đồng** hiện tại (không nhận ngày đã qua).
+- **Mức cọc người nhận phải đóng:** cọc 1 tháng hoặc cọc 3 tháng.
+
+Hai thông tin này hiện ngay trên thẻ tin và trang chi tiết để người xem quyết định nhanh.
+
+**Admin quản lý:** vào `/admin/pass-phong`. Ở đây xem được cả tin đã ẩn, tìm kiếm theo tiêu đề,
+địa chỉ, tên hoặc số điện thoại người đăng, và với mỗi tin có thể **Sửa**, **Đánh dấu đã pass xong**,
+**Ẩn tin** hoặc **Xóa**.
+
+### Chống spam
+
+Vì ai cũng đăng được tin nên form có ba lớp chặn cơ bản: một ô ẩn mà chỉ bot mới điền, chặn gửi
+nhanh dưới 3 giây, và toàn bộ dữ liệu được kiểm tra hai lần (trình duyệt và server) cộng với ràng buộc
+ngay trong database. Đây là mức đủ cho quy mô nhỏ; nếu sau này bị spam nhiều, bước tiếp theo nên làm
+là bắt tin chờ admin duyệt trước khi hiển thị.

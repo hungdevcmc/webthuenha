@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, LayoutList, Plus } from "lucide-react";
+import { ExternalLink, LayoutList, Plus, Repeat2 } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { buttonClasses } from "@/components/ui/button";
 import { SignOutButton } from "./sign-out-button";
@@ -18,6 +18,11 @@ export function AdminHeader({ email }: { email: string }) {
           </Link>
         </div>
         <nav className="flex items-center gap-2" aria-label="Quản trị">
+          <Link href="/admin/pass-phong" className={buttonClasses("ghost", "sm")}>
+            <Repeat2 className="size-4" aria-hidden="true" />
+            <span className="hidden sm:inline">Tin pass phòng</span>
+            <span className="sm:hidden">Pass phòng</span>
+          </Link>
           <Link href="/" target="_blank" rel="noopener" className={buttonClasses("ghost", "sm", "hidden md:inline-flex")}>
             <ExternalLink className="size-4" aria-hidden="true" />
             Xem trang công khai

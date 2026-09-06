@@ -1,0 +1,273 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import {
+  ArrowLeft,
+  Bath,
+  BedDouble,
+  Building2,
+  CalendarClock,
+  Check,
+  Droplets,
+  Layers,
+  MapPin,
+  Phone,
+  ReceiptText,
+  Ruler,
+  ShieldCheck,
+  User,
+  Zap,
+} from "lucide-react";
+import { siteConfig } from "@/config/site";
+import { createClient } from "@/lib/supabase/server";
+import { fetchPublicTransferBySlug } from "@/lib/transfers/queries";
+import { contractRemainingLabel, depositLabel, transferCover } from "@/lib/transfers/types";
+import { formatArea, formatDate, formatDateTime, formatPhone, formatUnitPrice, formatVND } from "@/lib/format";
+import { SiteHeader } from "@/components/site/site-header";
+import { SiteFooter } from "@/components/site/site-footer";
+import { ImageGallery } from "@/components/listings/image-gallery";
+import { ContactButtons, MobileContactBar } from "@/components/listings/contact-bar";
+import { ContractBadge, DepositBadge, TransferStatusBadge } from "@/components/transfers/transfer-badges";
+import { TransferRealtimeRefresh } from "@/components/transfers/transfer-realtime-refresh";
+
+type Props = PageProps<"/pass-phong/[slug]">;
+
+async function loadPost(slug: string) {
+  const supabase = await createClient();
+  return fetchPublicTransferBySlug(supabase, slug);
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await loadPost(slug).catch(() => null);
+  if (!post) return { title: "Không tìm thấy tin pass phòng" };
+  const cover = transferCover(post);
+  const description = `${formatVND(post.price)}/tháng · ${depositLabel(post.deposit_months)} · hợp đồng hết hạn ${formatDate(`${post.contract_end_date}T00:00:00`)} · ${post.address}`;
+  return {
+    title: post.title,
+    description,
+    alternates: { canonical: `/pass-phong/${post.slug}` },
+    openGraph: {
+      title: post.title,
+      description,
+      type: "article",
+      images: cover ? [{ url: cover.url, alt: post.title }] : undefined,
+    },
+  };
+}
+
+export default async function TransferDetailPage({ params }: Props) {
+  const { slug } = await params;
+  const post = await loadPost(slug);
+  if (!post) notFound();
+
+  // Đây là Server Component bất đồng bộ, chỉ chạy một lần cho mỗi request nên
+  // lấy giờ hiện tại ở đây là an toàn: không có lần render lại nào ở phía client.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
+  const done = post.is_transferred;
+
+  const specs = [
+    { icon: Ruler, label: "Diện tích", value: formatArea(post.area_m2) },
+    { icon: BedDouble, label: "Phòng ngủ", value: `${post.bedrooms}` },
+    { icon: Bath, label: "Nhà vệ sinh", value: `${post.bathrooms}` },
+    {
+      icon: Layers,
+      label: "Tầng",
+      value: post.floor !== null ? `Tầng ${post.floor}${post.total_floors ? ` / ${post.total_floors}` : ""}` : "—",
+    },
+    { icon: Building2, label: "Tổng số tầng", value: post.total_floors !== null ? `${post.total_floors} tầng` : "—" },
+  ];
+
+  const costs = [
+    { icon: ReceiptText, label: "Số tiền cọc", value: post.deposit > 0 ? formatVND(post.deposit) : "Không cần cọc" },
+    { icon: Zap, label: "Tiền điện", value: formatUnitPrice(post.electricity_price, post.electricity_unit) },
+    { icon: Droplets, label: "Tiền nước", value: formatUnitPrice(post.water_price, post.water_unit) },
+    {
+      icon: ShieldCheck,
+      label: "Phí dịch vụ",
+      value: post.service_fee_included
+        ? `Đã bao gồm trong giá thuê${post.service_fee > 0 ? ` (${formatVND(post.service_fee)}/tháng)` : ""}`
+        : post.service_fee > 0
+          ? `${formatVND(post.service_fee)}/tháng (chưa gồm trong giá thuê)`
+          : "Không có",
+    },
+  ];
+
+  return (
+    <>
+      <SiteHeader />
+      <TransferRealtimeRefresh postId={post.id} />
+      <main className="mx-auto max-w-6xl flex-1 px-4 pb-10 pt-4 sm:px-6 sm:pt-6">
+        <Link
+          href="/pass-phong"
+          className="inline-flex items-center gap-1.5 rounded-lg text-sm font-medium text-brand-700 hover:text-brand-800"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Tất cả tin pass phòng
+        </Link>
+
+        <div className="mt-4 grid gap-8 lg:grid-cols-[1fr_360px]">
+          <article className="min-w-0 space-y-8">
+            <ImageGallery images={post.images} title={post.title} />
+
+            <header>
+              <TransferStatusBadge done={done} />
+              <h1 className="mt-3 text-2xl font-bold leading-tight tracking-tight text-ink sm:text-3xl">{post.title}</h1>
+              <p className="mt-2 flex items-start gap-1.5 text-muted">
+                <MapPin className="mt-1 size-4 shrink-0 text-brand-600" aria-hidden="true" />
+                <span>{post.address}</span>
+              </p>
+              <p className="mt-4 text-3xl font-bold tracking-tight text-accent-600">
+                {formatVND(post.price)}
+                <span className="text-base font-medium text-muted">/tháng</span>
+              </p>
+              {done ? (
+                <p className="mt-3 rounded-xl bg-stone-100 px-4 py-3 text-sm text-stone-700">
+                  Phòng này đã pass được cho người khác. Bạn có thể xem các tin còn lại ở{" "}
+                  <Link href="/pass-phong" className="font-semibold text-brand-700 underline">
+                    danh sách pass phòng
+                  </Link>
+                  .
+                </p>
+              ) : null}
+            </header>
+
+            <section
+              aria-labelledby="transfer-terms-heading"
+              className="rounded-2xl border-2 border-amber-200 bg-amber-50/60 p-4 sm:p-5"
+            >
+              <h2 id="transfer-terms-heading" className="text-lg font-bold text-ink">
+                Điều kiện nhận lại phòng
+              </h2>
+              <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl bg-white p-4 ring-1 ring-inset ring-amber-100">
+                  <dt className="flex items-center gap-1.5 text-xs font-medium text-muted">
+                    <CalendarClock className="size-4 text-amber-700" aria-hidden="true" />
+                    Hợp đồng hết hạn
+                  </dt>
+                  <dd className="mt-1 text-lg font-bold text-ink">
+                    {formatDate(`${post.contract_end_date}T00:00:00`)}
+                  </dd>
+                  <dd className="text-sm text-muted">{contractRemainingLabel(post.contract_end_date, now)}</dd>
+                </div>
+                <div className="rounded-xl bg-white p-4 ring-1 ring-inset ring-amber-100">
+                  <dt className="flex items-center gap-1.5 text-xs font-medium text-muted">
+                    <ReceiptText className="size-4 text-amber-700" aria-hidden="true" />
+                    Tiền cọc phải đóng
+                  </dt>
+                  <dd className="mt-1 text-lg font-bold text-ink">{depositLabel(post.deposit_months)}</dd>
+                  <dd className="text-sm text-muted">
+                    {post.deposit > 0 ? `Tương đương ${formatVND(post.deposit)}` : "Chủ nhà không yêu cầu cọc"}
+                  </dd>
+                </div>
+              </dl>
+            </section>
+
+            <section aria-labelledby="specs-heading">
+              <h2 id="specs-heading" className="text-lg font-bold text-ink">
+                Thông số
+              </h2>
+              <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {specs.map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="rounded-xl border border-stone-200 bg-white p-3.5">
+                    <dt className="flex items-center gap-1.5 text-xs font-medium text-muted">
+                      <Icon className="size-4 text-brand-600" aria-hidden="true" />
+                      {label}
+                    </dt>
+                    <dd className="mt-1 font-semibold text-ink">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            <section aria-labelledby="costs-heading">
+              <h2 id="costs-heading" className="text-lg font-bold text-ink">
+                Chi phí hằng tháng
+              </h2>
+              <dl className="mt-3 divide-y divide-stone-200 rounded-xl border border-stone-200 bg-white">
+                {costs.map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="flex items-center justify-between gap-4 px-4 py-3">
+                    <dt className="flex items-center gap-2 text-sm text-muted">
+                      <Icon className="size-4 text-brand-600" aria-hidden="true" />
+                      {label}
+                    </dt>
+                    <dd className="text-right text-sm font-semibold text-ink">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            {post.amenities.length > 0 ? (
+              <section aria-labelledby="amenities-heading">
+                <h2 id="amenities-heading" className="text-lg font-bold text-ink">
+                  Nội thất và tiện nghi
+                </h2>
+                <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {post.amenities.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-sm text-ink">
+                      <Check className="size-4 shrink-0 text-brand-600" aria-hidden="true" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            <section aria-labelledby="desc-heading">
+              <h2 id="desc-heading" className="text-lg font-bold text-ink">
+                Mô tả chi tiết
+              </h2>
+              <p className="mt-3 whitespace-pre-line leading-relaxed text-ink">{post.description}</p>
+            </section>
+
+            <p className="flex items-center gap-1.5 text-sm text-stone-400">
+              <CalendarClock className="size-4" aria-hidden="true" />
+              Cập nhật lần cuối: {formatDateTime(post.updated_at)}
+            </p>
+          </article>
+
+          <aside className="lg:sticky lg:top-24 lg:self-start">
+            <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-card">
+              <h2 className="text-base font-bold text-ink">Liên hệ nhận phòng</h2>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                <ContractBadge date={post.contract_end_date} now={now} withDate={false} />
+                <DepositBadge months={post.deposit_months} />
+              </div>
+              <dl className="mt-3 space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <dt className="sr-only">Người liên hệ</dt>
+                  <User className="size-4 text-brand-600" aria-hidden="true" />
+                  <dd className="font-medium text-ink">{post.contact_name}</dd>
+                </div>
+                <div className="flex items-center gap-2">
+                  <dt className="sr-only">Số điện thoại</dt>
+                  <Phone className="size-4 text-brand-600" aria-hidden="true" />
+                  <dd className="font-medium text-ink">{formatPhone(post.contact_phone)}</dd>
+                </div>
+              </dl>
+              <ContactButtons
+                phone={post.contact_phone}
+                zalo={post.contact_zalo}
+                disabled={done}
+                disabledText="Phòng đã pass xong, tạm ngừng nhận liên hệ."
+                className="mt-4"
+              />
+              <p className="mt-3 text-xs leading-relaxed text-muted">
+                Tin do người thuê tự đăng. Vui lòng xem phòng và đọc kỹ hợp đồng trước khi đặt cọc. Cần hỗ trợ, gọi{" "}
+                {siteConfig.contact.phone}.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </main>
+      <SiteFooter />
+      <MobileContactBar
+        phone={post.contact_phone}
+        zalo={post.contact_zalo}
+        disabled={done}
+        disabledText="Phòng đã pass xong, tạm ngừng nhận liên hệ."
+      />
+    </>
+  );
+}

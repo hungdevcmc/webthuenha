@@ -15,6 +15,15 @@ type Props = {
   value: ListingImageInput[];
   onChange: (next: ListingImageInput[]) => void;
   disabled?: boolean;
+  /** Số ảnh tối đa cho tin này */
+  maxCount?: number;
+  /** Thư mục trong Storage, ví dụ "pass" cho ảnh khách tự tải lên */
+  storagePrefix?: string;
+  /**
+   * Có được xóa hẳn file khỏi Storage khi bỏ ảnh chưa lưu hay không.
+   * Form công khai đặt false vì khách ẩn danh không có quyền xóa file.
+   */
+  canDeleteFiles?: boolean;
 };
 
 type Uploading = { key: string; name: string; preview: string };
@@ -24,16 +33,23 @@ function renumber(list: ListingImageInput[]): ListingImageInput[] {
   return list.map((img, index) => ({ ...img, sort_order: index, is_cover: hasCover ? img.is_cover : index === 0 }));
 }
 
-export function ImageUploader({ value, onChange, disabled }: Props) {
+export function ImageUploader({
+  value,
+  onChange,
+  disabled,
+  maxCount = IMAGE_MAX_COUNT,
+  storagePrefix,
+  canDeleteFiles = true,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<Uploading[]>([]);
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     const list = Array.from(files);
-    const remaining = IMAGE_MAX_COUNT - value.length - uploading.length;
+    const remaining = maxCount - value.length - uploading.length;
     if (list.length > remaining) {
-      toast.error(`Chỉ có thể thêm tối đa ${IMAGE_MAX_COUNT} ảnh cho mỗi tin.`);
+      toast.error(`Chỉ có thể thêm tối đa ${maxCount} ảnh cho mỗi tin.`);
       return;
     }
     const valid: File[] = [];
@@ -57,7 +73,7 @@ export function ImageUploader({ value, onChange, disabled }: Props) {
       valid.map(async (file, index) => {
         const item = pending[index];
         try {
-          const uploaded = await uploadImage(supabase, file);
+          const uploaded = await uploadImage(supabase, file, storagePrefix);
           current = renumber([
             ...current,
             { storage_path: uploaded.storage_path, url: uploaded.url, sort_order: current.length, is_cover: false },
@@ -91,7 +107,7 @@ export function ImageUploader({ value, onChange, disabled }: Props) {
     const next = renumber(value.filter((_, i) => i !== index));
     onChange(next);
     // Ảnh vừa upload (chưa lưu vào tin) thì xóa luôn khỏi Storage để tránh file rác
-    if (!target.id) {
+    if (!target.id && canDeleteFiles) {
       const result = await deleteStorageObjects([target.storage_path]);
       if (!result.ok) toast.error(result.error);
     }
@@ -113,7 +129,7 @@ export function ImageUploader({ value, onChange, disabled }: Props) {
       >
         <ImagePlus className="size-8 text-brand-600" aria-hidden="true" />
         <span className="text-sm font-semibold text-ink">Chọn ảnh hoặc kéo thả vào đây</span>
-        <span className="text-xs text-muted">JPG, PNG hoặc WebP · tối đa 5 MB/ảnh · tối đa {IMAGE_MAX_COUNT} ảnh. Ảnh được nén tự động.</span>
+        <span className="text-xs text-muted">JPG, PNG hoặc WebP · tối đa 5 MB/ảnh · tối đa {maxCount} ảnh. Ảnh được nén tự động.</span>
         <input
           ref={inputRef}
           id="image-input"

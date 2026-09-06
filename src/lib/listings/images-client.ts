@@ -36,7 +36,7 @@ export async function compressImage(file: File): Promise<Blob> {
   }
 }
 
-function buildStoragePath(): string {
+function buildStoragePath(prefix?: string): string {
   const now = new Date();
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -44,17 +44,23 @@ function buildStoragePath(): string {
     typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  return `${yyyy}/${mm}/${id}.webp`;
+  const folder = prefix ? `${prefix}/${yyyy}/${mm}` : `${yyyy}/${mm}`;
+  return `${folder}/${id}.webp`;
 }
 
-/** Upload một ảnh (đã nén) lên Storage, trả về đường dẫn và URL công khai */
+/**
+ * Upload một ảnh (đã nén) lên Storage, trả về đường dẫn và URL công khai.
+ * `prefix` dùng để tách thư mục theo nguồn ảnh, ví dụ "pass" cho ảnh khách tự tải lên.
+ */
 export async function uploadImage(
   supabase: SupabaseClient<Database>,
   file: File,
+  prefix?: string,
 ): Promise<UploadedImage> {
   const blob = await compressImage(file);
   const contentType = blob.type || "image/webp";
-  const path = contentType === "image/webp" ? buildStoragePath() : buildStoragePath().replace(/\.webp$/, "");
+  const basePath = buildStoragePath(prefix);
+  const path = contentType === "image/webp" ? basePath : basePath.replace(/\.webp$/, "");
   const { error } = await supabase.storage.from(IMAGE_BUCKET).upload(path, blob, {
     contentType,
     cacheControl: "31536000",

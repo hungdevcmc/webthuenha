@@ -1,0 +1,66 @@
+[CHIA SẺ] Website tìm phòng trọ, tìm bạn ở ghép và pass phòng quanh VinUni
+
+Chào cả nhà,
+
+Thời gian qua mình thấy nhiều bạn hỏi tìm phòng, tìm người ở ghép và pass lại phòng, nhưng thông tin nằm rải rác và trôi rất nhanh trong group. Mình có làm một website nhỏ để gom lại cho dễ tìm, xin phép chia sẻ với mọi người:
+
+https://aithucchiennhatro.vercel.app
+
+WEBSITE CÓ 4 MỤC
+
+• Tất cả phòng — danh sách phòng đang cho thuê, ghi rõ giá, tiền cọc, tiền điện nước, phí dịch vụ và khoảng cách tới VinUni.
+
+• Tìm bạn ở ghép — phòng đang cần thêm người ở chung, ghi rõ giá một chỗ mỗi tháng, phòng nam hay phòng nữ, hiện đã có mấy bạn ở.
+
+• Pass lại phòng — bạn nào cần nhượng lại cả phòng thì đăng ở đây, ghi rõ hợp đồng còn hạn tới ngày nào và người nhận đóng cọc 1 tháng hay 3 tháng.
+
+• Pass slot phòng — bạn nào đang ở ghép, muốn nhượng lại chỗ của riêng mình thì đăng ở mục này.
+
+Ai cũng tự đăng tin được, không cần tạo tài khoản. Muốn xem phòng thì bấm gọi hoặc nhắn Zalo thẳng cho người đăng.
+
+━━━━━━━━━━━━━━━━━━━━
+
+MỘT SỐ THÔNG TIN MINH BẠCH MÌNH XIN NÓI RÕ
+
+1. VỀ QUAN HỆ VỚI CHƯƠNG TRÌNH
+
+Đây là dự án cá nhân nhằm hỗ trợ cộng đồng học viên, hoàn toàn không trực thuộc, không đại diện và không được bảo lãnh bởi Ban tổ chức chương trình. Mình tự làm, tự vận hành. Mọi vấn đề phát sinh từ website thuộc trách nhiệm của mình, không phải của BTC.
+
+2. VỀ TÀI CHÍNH
+
+Mình xin nói rõ để mọi người nắm và tự cân nhắc: dự án này có phát sinh chi phí, và toàn bộ chi phí đó do phía chủ nhà chi trả.
+
+Các bạn học viên không phải thanh toán bất kỳ khoản nào. Xem tin miễn phí, đăng tin miễn phí, xem phòng miễn phí, không có gói trả phí nào cả. Khoản chi phí kia do chủ nhà trả và không cộng thêm vào tiền thuê của các bạn.
+
+Website cũng không có chức năng thanh toán. Tiền thuê và tiền cọc các bạn trả thẳng cho chủ nhà.
+
+3. VỀ DỮ LIỆU CÁ NHÂN
+
+Khi đăng tin, website lưu tên, số điện thoại, Zalo và ảnh phòng của bạn. Mình cam kết:
+
+• Dữ liệu chỉ dùng duy nhất cho mục đích tìm phòng và ghép phòng.
+• Tuyệt đối không chia sẻ, bán hay trao đổi cho bất kỳ bên thứ ba nào.
+• Không quảng cáo, không công cụ theo dõi hành vi.
+• Toàn bộ dữ liệu sẽ được đóng và xóa khi đợt tìm phòng của khóa học kết thúc.
+• Bạn muốn gỡ tin hoặc xóa thông tin lúc nào cũng được, nhắn mình, xử lý trong 24 giờ.
+
+Lưu ý: số điện thoại bạn nhập khi đăng tin sẽ hiển thị công khai trên tin đó, vì người muốn thuê cần gọi cho bạn. Bạn nào không muốn công khai số thì đừng đăng tin nhé.
+
+4. VỀ PHẢN HỒI
+
+Tin đăng là do người dùng tự nhập, mình không thẩm định được tính chính xác của từng tin. Nếu gặp tình trạng ép giá, tranh chấp tiền cọc hay thông tin sai sự thật, các bạn báo mình ngay qua Zalo 0372 464 016. Mình gỡ tin vi phạm trong vòng 24 giờ.
+
+Toàn bộ cam kết trên mình ghi đầy đủ tại đây để mọi người tiện kiểm tra:
+https://aithucchiennhatro.vercel.app/cam-ket
+
+━━━━━━━━━━━━━━━━━━━━
+
+NHẮC NHỞ AN TOÀN KHI THUÊ PHÒNG
+
+• Luôn xem phòng tận nơi trước khi chuyển bất kỳ khoản tiền nào.
+• Không chuyển cọc cho người lạ khi chưa gặp mặt và chưa xem giấy tờ nhà.
+• Yêu cầu hợp đồng bằng văn bản, ghi rõ tiền cọc, tiền điện nước và điều kiện trả phòng.
+• Giữ lại biên nhận mỗi lần đóng tiền.
+• Nên rủ thêm một người bạn cùng đi xem phòng.
+
+Hy vọng giúp được mọi người. Có góp ý gì cứ nhắn mình nhé!

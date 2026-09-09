@@ -96,12 +96,12 @@ export const siteConfig = {
     /** Số dùng cho liên kết gọi điện và Zalo (chỉ chữ số) */
     phoneRaw: "0372464016",
     /** Địa chỉ văn phòng / khu vực hoạt động */
-    address: "Quận 7, Thành phố Hồ Chí Minh",
+    address: "Vinhomes Ocean Park 1, Hà Nội",
     /** Khung giờ nhận cuộc gọi */
     hours: "8:00 – 21:00 hằng ngày",
   },
   /** Thành phố mặc định khi tạo tin mới trong trang quản trị */
-  defaultCity: "Thành phố Hồ Chí Minh",
+  defaultCity: "Thành phố Hà Nội",
   /** Địa chỉ website production (dùng cho SEO). Có thể ghi đè bằng biến NEXT_PUBLIC_SITE_URL */
   url: resolveSiteUrl(),
   /** Các tiện nghi gợi ý trong form quản trị */

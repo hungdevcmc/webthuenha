@@ -159,13 +159,13 @@ export function ListingForm(props: Props) {
     <form onSubmit={onSubmit} noValidate className="space-y-8 pb-28">
       <Section title="Thông tin chung" description="Tiêu đề ngắn gọn, địa chỉ đầy đủ để khách dễ tìm.">
         <Field label="Tiêu đề" id="title" required error={err("title")} className="sm:col-span-2">
-          <Input id="title" {...register("title")} invalid={!!errors.title} placeholder="Ví dụ: Phòng trọ 25 m² có gác, gần Lotte Mart Quận 7" />
+          <Input id="title" {...register("title")} invalid={!!errors.title} placeholder="Ví dụ: Căn hộ 2 phòng ngủ tòa S2.03, Vinhomes Ocean Park 1" />
         </Field>
         <Field label="Địa chỉ đầy đủ" id="address" required error={err("address")} className="sm:col-span-2">
           <Input id="address" {...register("address")} invalid={!!errors.address} placeholder="Số nhà, đường, phường, quận" />
         </Field>
         <Field label="Khu vực (quận/huyện)" id="district" required error={err("district")} hint="dùng cho bộ lọc">
-          <Input id="district" {...register("district")} invalid={!!errors.district} placeholder="Quận 7" />
+          <Input id="district" {...register("district")} invalid={!!errors.district} placeholder="Quận Gia Lâm" />
         </Field>
         <Field label="Tỉnh / thành phố" id="city" required error={err("city")}>
           <Input id="city" {...register("city")} invalid={!!errors.city} />

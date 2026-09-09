@@ -27,6 +27,7 @@ import { coverImage, roommateInfo } from "@/lib/listings/types";
 import { formatArea, formatDateTime, formatDistance, formatPhone, formatUnitPrice, formatVND } from "@/lib/format";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { ReportLink } from "@/components/site/report-link";
 import { ImageGallery } from "@/components/listings/image-gallery";
 import { StatusBadge } from "@/components/listings/status-badge";
 import { ContactButtons, MobileContactBar } from "@/components/listings/contact-bar";
@@ -283,6 +284,7 @@ export default async function ListingDetailPage({ params }: Props) {
               <p className="mt-3 text-xs leading-relaxed text-muted">
                 Gọi trong khung giờ {siteConfig.contact.hours}. Không thu phí xem phòng.
               </p>
+              <ReportLink subject={listing.title} className="mt-3 border-t border-stone-200 pt-3" />
             </div>
           </aside>
         </div>

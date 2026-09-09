@@ -40,6 +40,14 @@ export default function NewSlotTransferPage() {
             <p className="font-semibold">Trước khi đăng, bạn nên biết</p>
             <ul className="mt-1.5 list-disc space-y-1 pl-4 text-muted">
               <li>Số điện thoại bạn nhập sẽ hiển thị công khai để người xem liên hệ.</li>
+              <li>
+                {siteConfig.compliance.privacyShort} Dữ liệu sẽ được xóa{" "}
+                {siteConfig.compliance.dataRetention}. Xem{" "}
+                <Link href="/cam-ket" className="font-medium text-brand-700 underline">
+                  cam kết minh bạch
+                </Link>
+                .
+              </li>
               <li>Nên hỏi ý các bạn đang ở cùng phòng trước khi tìm người thay chỗ của bạn.</li>
               <li>Ghi rõ giờ giấc sinh hoạt của phòng để tìm được người phù hợp.</li>
               <li>Cần sửa hoặc gỡ tin sau khi đăng, gọi {siteConfig.contact.phone} để quản trị viên hỗ trợ.</li>

@@ -33,6 +33,9 @@ Mọi nội dung thương hiệu nằm trong **một file duy nhất**: [`src/co
 | Tên trường dùng làm mốc đo khoảng cách | `school.name`, `school.shortName` |
 | Tiêu đề và lời giới thiệu tab Pass lại phòng | `transfer.title`, `transfer.intro` |
 | Tiêu đề và lời giới thiệu tab Pass slot phòng | `slotTransfer.title`, `slotTransfer.intro` |
+| Dòng miễn trừ trách nhiệm | `compliance.disclaimer` |
+| Dự án phi lợi nhuận hay có hoa hồng | `compliance.nonProfit`, `compliance.commissionNote` |
+| Thời điểm xóa dữ liệu học viên | `compliance.dataRetention` |
 
 Sửa xong thì lưu file, chạy lại (`npm run dev`) hoặc đẩy lên Git để Vercel tự triển khai.
 
@@ -309,3 +312,41 @@ Hai loại tin dùng chung bảng `transfer_posts`, phân biệt bằng cột `k
 vậy RLS, Realtime, Storage và phần lớn giao diện dùng lại được, không phải nhân đôi. Cột `price`
 mang nghĩa "số tiền người nhận trả mỗi tháng": với `room` là tiền cả phòng, với `slot` là tiền một
 chỗ.
+
+## 15. Minh bạch và cam kết với học viên
+
+Theo yêu cầu của Ban tổ chức chương trình, website công khai bốn nhóm thông tin. Toàn bộ nội
+dung nằm trong `compliance` của [`src/config/site.ts`](src/config/site.ts), sửa một chỗ là đổi
+khắp nơi.
+
+| Nội dung | Hiển thị ở đâu |
+| --- | --- |
+| Miễn trừ trách nhiệm với BTC | Banner vàng đầu trang chủ + chân trang mọi trang + `/cam-ket` |
+| Tính chất tài chính | Chân trang + `/cam-ket` mục 2 |
+| Cam kết bảo mật dữ liệu | Hộp lưu ý ở hai form đăng tin + `/cam-ket` mục 3 |
+| Kênh báo cáo vi phạm | Cuối hộp liên hệ ở mọi trang chi tiết + `/cam-ket` mục 4 |
+
+### Khai báo tài chính — kiểm tra trước khi đăng bài
+
+```ts
+compliance: {
+  nonProfit: true,        // true = phi lợi nhuận 100%, không nhận hoa hồng
+  commissionNote: "",     // chỉ dùng khi nonProfit = false
+}
+```
+
+Mặc định là `true`, đúng với phần mềm hiện tại: không có chức năng thanh toán, không có luồng
+hoa hồng nào trong mã nguồn. **Nếu bạn có nhận hoa hồng từ chủ nhà ngoài website**, hãy đổi
+thành `false` và ghi rõ mức hoa hồng vào `commissionNote`; trang `/cam-ket` và chân trang sẽ tự
+đổi nội dung theo.
+
+### Xóa dữ liệu khi kết thúc đợt
+
+Khi đợt tìm phòng kết thúc, vào trang quản trị xóa các tin khách tự đăng ở `/admin/pass-phong`
+và `/admin/pass-slot`. Ảnh trong Storage được dọn theo tin (chỉ giữ lại file còn tin khác dùng).
+
+### Bài đăng lên group
+
+Bản nháp bài đăng có đủ nội dung minh bạch nằm ở
+[`docs/bai-dang-group.md`](docs/bai-dang-group.md), gồm bản dài cho Facebook và bản ngắn cho
+Discord.

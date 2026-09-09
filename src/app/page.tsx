@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { fetchPublicListings } from "@/lib/listings/queries";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { DisclaimerNotice } from "@/components/site/disclaimer-notice";
 import { ListingGrid } from "@/components/listings/listing-grid";
 import { ListingGridSkeleton } from "@/components/listings/listing-skeleton";
 import { MobileContactBar } from "@/components/listings/contact-bar";
@@ -39,6 +40,9 @@ export default function HomePage() {
               {siteConfig.tagline}
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">{siteConfig.intro}</p>
+
+            <DisclaimerNotice className="mt-5 max-w-3xl" />
+
             <ul className="mt-8 grid gap-3 sm:grid-cols-3">
               {trustPoints.map(({ icon: Icon, title, text }) => (
                 <li key={title} className="flex gap-3 rounded-2xl border border-brand-100 bg-white/80 p-4">

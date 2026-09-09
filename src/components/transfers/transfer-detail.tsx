@@ -32,6 +32,7 @@ import { formatArea, formatDate, formatDateTime, formatDistance, formatPhone, fo
 import { ImageGallery } from "@/components/listings/image-gallery";
 import { ContactButtons, MobileContactBar } from "@/components/listings/contact-bar";
 import { DistanceBadge } from "@/components/listings/distance-badge";
+import { ReportLink } from "@/components/site/report-link";
 import { ContractBadge, DepositBadge, RoomGenderBadge, SlotBadge, TransferStatusBadge } from "./transfer-badges";
 import { TransferRealtimeRefresh } from "./transfer-realtime-refresh";
 
@@ -281,9 +282,10 @@ export function TransferDetail({ post, now }: Props) {
                 className="mt-4"
               />
               <p className="mt-3 text-xs leading-relaxed text-muted">
-                Tin do người thuê tự đăng. Vui lòng xem phòng và đọc kỹ hợp đồng trước khi đặt cọc. Cần hỗ trợ, gọi{" "}
-                {siteConfig.contact.phone}.
+                Tin do người thuê tự đăng, chúng tôi không thẩm định được tính chính xác. Vui lòng xem phòng tận nơi và
+                đọc kỹ hợp đồng trước khi đặt cọc.
               </p>
+              <ReportLink subject={post.title} className="mt-3 border-t border-stone-200 pt-3" />
             </div>
           </aside>
         </div>

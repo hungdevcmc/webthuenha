@@ -9,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/o-ghep`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/pass-phong`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/pass-slot`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/cam-ket`, changeFrequency: "monthly", priority: 0.5 },
   ];
   try {
     const supabase = await createClient();

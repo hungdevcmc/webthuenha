@@ -36,10 +36,25 @@ export function SiteFooter() {
         </div>
         <div className="text-sm text-muted md:text-right">
           <p>© {new Date().getFullYear()} {siteConfig.name}</p>
-          <Link href="/admin" className="mt-2 inline-block text-xs text-stone-400 hover:text-stone-600">
+          <Link href="/cam-ket" className="mt-2 inline-block font-medium text-brand-700 hover:text-brand-800">
+            Cam kết minh bạch
+          </Link>
+          <Link href="/admin" className="mt-2 block text-xs text-stone-400 hover:text-stone-600">
             Trang quản trị
           </Link>
         </div>
+      </div>
+
+      <div className="border-t border-stone-200 bg-stone-50">
+        <p className="mx-auto max-w-6xl px-4 py-4 text-xs leading-relaxed text-muted sm:px-6">
+          {siteConfig.compliance.disclaimer}{" "}
+          {siteConfig.compliance.nonProfit
+            ? "Dự án phi lợi nhuận, không thu phí học viên và không nhận hoa hồng từ chủ nhà."
+            : siteConfig.compliance.commissionNote}{" "}
+          <Link href="/cam-ket" className="font-medium text-brand-700 underline hover:text-brand-800">
+            Xem chi tiết cam kết và chính sách dữ liệu
+          </Link>
+        </p>
       </div>
     </footer>
   );

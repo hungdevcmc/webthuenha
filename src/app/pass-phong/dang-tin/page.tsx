@@ -41,6 +41,14 @@ export default function NewTransferPage() {
             <ul className="mt-1.5 list-disc space-y-1 pl-4 text-muted">
               <li>Số điện thoại bạn nhập sẽ hiển thị công khai để người xem liên hệ.</li>
               <li>
+                {siteConfig.compliance.privacyShort} Dữ liệu sẽ được xóa{" "}
+                {siteConfig.compliance.dataRetention}. Xem{" "}
+                <Link href="/cam-ket" className="font-medium text-brand-700 underline">
+                  cam kết minh bạch
+                </Link>
+                .
+              </li>
+              <li>
                 Hãy hỏi chủ nhà xem có đồng ý cho sang nhượng hợp đồng không, tránh mất cọc khi bàn giao.
               </li>
               <li>

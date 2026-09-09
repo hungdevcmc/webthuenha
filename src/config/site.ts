@@ -46,6 +46,35 @@ export const siteConfig = {
     intro:
       "Nơi các bạn đang ở ghép nhượng lại chỗ của mình trong phòng. Mỗi tin ghi rõ pass mấy slot, giá một slot mỗi tháng, phòng dành cho nam hay nữ và hợp đồng còn hạn tới ngày nào.",
   },
+  /**
+   * MINH BẠCH VÀ CAM KẾT
+   * --------------------
+   * Nội dung theo yêu cầu của Ban tổ chức chương trình. Sửa ở đây là
+   * đổi cả banner trang chủ, trang /cam-ket và chân trang.
+   */
+  compliance: {
+    /** Dòng miễn trừ trách nhiệm, hiện ở trang chủ và chân mọi trang */
+    disclaimer:
+      "Đây là dự án cá nhân nhằm hỗ trợ cộng đồng học viên, hoàn toàn không trực thuộc, không đại diện và không được bảo lãnh bởi Ban tổ chức chương trình.",
+
+    /**
+     * TÀI CHÍNH
+     * true  = phi lợi nhuận 100%, không nhận hoa hồng từ chủ nhà.
+     * false = có nhận hoa hồng; nội dung trong `commissionNote` sẽ hiện
+     *         ở chân trang và trang /cam-ket.
+     */
+    nonProfit: false,
+    /** Chỉ dùng khi nonProfit = false. Muốn ghi rõ mức hoa hồng thì bổ sung vào câu này. */
+    commissionNote:
+      "Chi phí vận hành dự án hoàn toàn do chủ nhà chi trả. Học viên không phải thanh toán bất kỳ khoản nào.",
+
+    /** Thời điểm đóng và xóa dữ liệu do học viên gửi lên */
+    dataRetention: "khi đợt tìm phòng của khóa học kết thúc",
+
+    /** Mô tả ngắn về việc dùng dữ liệu, hiện ở form đăng tin */
+    privacyShort:
+      "Thông tin bạn nhập chỉ dùng để người có nhu cầu liên hệ thuê hoặc ghép phòng, không chia sẻ cho bên thứ ba nào khác.",
+  },
   /** Trường học dùng làm mốc đo khoảng cách của mỗi phòng */
   school: {
     /** Tên đầy đủ, hiện trong nhãn và form */
